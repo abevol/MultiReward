@@ -1,6 +1,8 @@
 local config = {
     Enabled = true,
     Debug = true,
+    RemoveMaxGodsLimits = true,
+    AvoidReplacingTraits = true,
     RewardCount = {
         -- Set the reward count for each 'RewardType'.
         Story = 1,
@@ -16,6 +18,7 @@ local config = {
             DemeterUpgrade = 3,
             Others = 3
         },
+        GiftDrop = 3,
         MetaCurrencyDrop = 3,
         MemPointsCommonDrop = 3,
         RoomMoneyDrop = 3,

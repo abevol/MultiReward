@@ -33,3 +33,15 @@ ModUtil.Path.Wrap("SpawnRoomReward", function(base, eventSource, args)
     end
     return reward
 end, mod)
+
+if mod.Config.RemoveMaxGodsLimits then
+    ModUtil.Path.Wrap("ReachedMaxGods", function(base, excludedGods)
+        return false
+    end, mod)
+end
+
+if mod.Config.AvoidReplacingTraits then
+    ModUtil.Path.Wrap("GetReplacementTraits", function(base, traitNames, onlyFromLootName)
+        return {}
+    end, mod)
+end
