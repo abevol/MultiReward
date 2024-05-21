@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.0] - 2024-05-21
 
+## [1.0.0] - 2024-05-21
+
 ### Added
 
 - Compatible with Chalk-2.0.2
@@ -27,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First version of the mod!
 
 [unreleased]: https://github.com/abevol/MultiReward/compare/1.0.0...HEAD
+[1.0.0]: https://github.com/abevol/MultiReward/compare/1.0.0...1.0.0
 [1.0.0]: https://github.com/abevol/MultiReward/compare/0.0.2...1.0.0
 [0.0.2]: https://github.com/abevol/MultiReward/compare/0.0.1...0.0.2
 [0.0.1]: https://github.com/abevol/MultiReward/compare/0.0.1
