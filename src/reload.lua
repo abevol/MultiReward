@@ -1,9 +1,31 @@
-local mod = MultiReward
+---@meta _
+-- globals we define are private to our plugin!
+---@diagnostic disable: lowercase-global
 
-if not mod.Config.Enabled then return end
+-- this file will be reloaded if it changes during gameplay,
+-- 	so only assign to values or define things here.
+
+function sjson_ShellText(data)
+	for _,v in ipairs(data.Texts) do
+		if v.Id == 'MainMenuScreen_PlayGame' then
+			v.DisplayName = 'Test ' .. _PLUGIN.guid
+			break
+		end
+	end
+end
+
+function wrap_SetupMap(base)
+	print('Map is loading, here we might load some packages.')
+	-- game.LoadPackages({Name = package_name_string})
+	return base()
+end
+
+function trigger_Gift()
+	ModUtil.mod.Hades.PrintOverhead(Config.message)
+end
 
 local function printMsg(text)
-    if not mod.Config.Debug then return end
+    if not Config.Debug then return end
     local green = "\x1b[32m"
     local reset = "\x1b[0m"
     print(green .. "[MultiReward] " .. text .. reset)
@@ -17,14 +39,14 @@ local function getRewardCount(config, rewardType, lootName)
     return v or 1
 end
 
-ModUtil.Path.Wrap("SpawnRoomReward", function(base, eventSource, args)
-    args = args or {}
+function patch_SpawnRoomReward(base, eventSource, args)
+	args = args or {}
     local reward = nil
     local currentRoom = CurrentRun.CurrentRoom
     local currentEncounter = CurrentRun.CurrentRoom.Encounter
     local rewardType = args.RewardOverride or currentEncounter.EncounterRoomRewardOverride or currentRoom.ChangeReward or currentRoom.ChosenRewardType
     local lootName = args.LootName or currentRoom.ForceLootName
-    local rewardCount = getRewardCount(mod.Config.RewardCount, rewardType, lootName)
+    local rewardCount = getRewardCount(Config.RewardCount, rewardType, lootName)
 
     printMsg(string.format("RewardCount: %d, RewardType: %s, LootName: %s", rewardCount, rewardType, lootName))
 
@@ -32,16 +54,8 @@ ModUtil.Path.Wrap("SpawnRoomReward", function(base, eventSource, args)
         reward = base(eventSource, args)
     end
     return reward
-end, mod)
-
-if mod.Config.RemoveMaxGodsLimits then
-    ModUtil.Path.Wrap("ReachedMaxGods", function(base, excludedGods)
-        return false
-    end, mod)
 end
 
-if mod.Config.AvoidReplacingTraits then
-    ModUtil.Path.Wrap("GetReplacementTraits", function(base, traitNames, onlyFromLootName)
-        return {}
-    end, mod)
+function patch_GetReplacementTraits(base, traitNames, onlyFromLootName)
+	return {}
 end

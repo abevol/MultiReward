@@ -41,13 +41,13 @@ Suggest using [Hell2Modding].
 ## Requirements
 
 Mod loader:
-[Hell2Modding-Hell2Modding-1.0.23]
+[Hell2Modding-Hell2Modding-1.0.28]
 
 Supporting mods:
-[SGG_Modding-DemonDaemon-1.0.1]
+[SGG_Modding-DemonDaemon-1.1.0]
 [SGG_Modding-ModUtil-3.1.1]
 [SGG_Modding-ENVY-1.0.0]
-[SGG_Modding-Chalk-1.0.0]
+[SGG_Modding-Chalk-2.0.2]
 [SGG_Modding-SJSON-1.0.0]
 [SGG_Modding-ReLoad-1.0.1]
 
@@ -101,10 +101,10 @@ Others = 3
 ```
 
 [Hell2Modding]: https://thunderstore.io/c/hades-ii/p/Hell2Modding/Hell2Modding/
-[Hell2Modding-Hell2Modding-1.0.23]: https://thunderstore.io/package/download/Hell2Modding/Hell2Modding/1.0.23/
-[SGG_Modding-DemonDaemon-1.0.1]: https://thunderstore.io/package/download/SGG_Modding/DemonDaemon/1.0.1/
+[Hell2Modding-Hell2Modding-1.0.28]: https://thunderstore.io/package/download/Hell2Modding/Hell2Modding/1.0.28/
+[SGG_Modding-DemonDaemon-1.1.0]: https://thunderstore.io/package/download/SGG_Modding/DemonDaemon/1.1.0/
 [SGG_Modding-ModUtil-3.1.1]: https://thunderstore.io/package/download/SGG_Modding/ModUtil/3.1.1/
 [SGG_Modding-ENVY-1.0.0]: https://thunderstore.io/package/download/SGG_Modding/ENVY/1.0.0/
-[SGG_Modding-Chalk-1.0.0]: https://thunderstore.io/package/download/SGG_Modding/Chalk/1.0.0/
+[SGG_Modding-Chalk-2.0.2]: https://thunderstore.io/package/download/SGG_Modding/Chalk/2.0.2/
 [SGG_Modding-SJSON-1.0.0]: https://thunderstore.io/package/download/SGG_Modding/SJSON/1.0.0/
 [SGG_Modding-ReLoad-1.0.1]: https://thunderstore.io/package/download/SGG_Modding/ReLoad/1.0.1/
