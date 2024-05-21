@@ -31,19 +31,36 @@ local function printMsg(text)
     print(green .. "[MultiReward] " .. text .. reset)
 end
 
+-- local function getRewardCount(config, rewardType, lootName)
+--     local v = config[rewardType] or config["Others"]
+--     if type(v) == "table" then
+--         v = v[lootName] or v["Others"]
+--     end
+--     return v or 1
+-- end
+
 local function getRewardCount(config, rewardType, lootName)
-    local v = config[rewardType] or config["Others"]
+    local v = config[rewardType]
     if type(v) == "table" then
-        v = v[lootName] or v["Others"]
+        v = v[lootName]
+        if type(v) ~= "number" then
+            v = v["Others"]
+        end
     end
-    return v or 1
+    if type(v) ~= "number" then
+        v = config["Others"]
+    end
+    if type(v) ~= "number" then
+        v = 1
+    end
+    return v
 end
 
 function patch_SpawnRoomReward(base, eventSource, args)
 	args = args or {}
     local reward = nil
-    local currentRoom = CurrentRun.CurrentRoom
-    local currentEncounter = CurrentRun.CurrentRoom.Encounter
+    local currentRoom = Game.CurrentRun.CurrentRoom
+    local currentEncounter = Game.CurrentRun.CurrentRoom.Encounter
     local rewardType = args.RewardOverride or currentEncounter.EncounterRoomRewardOverride or currentRoom.ChangeReward or currentRoom.ChosenRewardType
     local lootName = args.LootName or currentRoom.ForceLootName
     local rewardCount = getRewardCount(Config.RewardCount, rewardType, lootName)
