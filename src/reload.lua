@@ -5,25 +5,6 @@
 -- this file will be reloaded if it changes during gameplay,
 -- 	so only assign to values or define things here.
 
-function sjson_ShellText(data)
-	for _,v in ipairs(data.Texts) do
-		if v.Id == 'MainMenuScreen_PlayGame' then
-			v.DisplayName = 'Test ' .. _PLUGIN.guid
-			break
-		end
-	end
-end
-
-function wrap_SetupMap(base)
-	print('Map is loading, here we might load some packages.')
-	-- game.LoadPackages({Name = package_name_string})
-	return base()
-end
-
-function trigger_Gift()
-	ModUtil.mod.Hades.PrintOverhead(Config.message)
-end
-
 local function printMsg(text)
     if not Config.Debug then return end
     local green = "\x1b[32m"

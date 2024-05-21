@@ -7,20 +7,6 @@
 -- 	so you will most likely want to have it reference
 --	values and functions later defined in `reload.lua`.
 
-local file = rom.path.combine(rom.paths.Content, 'Game/Text/en/ShellText.en.sjson')
-
-SJSON.hook(file, function(data)
-	return sjson_ShellText(data)
-end)
-
-ModUtil.mod.Path.Wrap("SetupMap", function(base)
-	return wrap_SetupMap(base)
-end)
-
-Game.OnControlPressed({'Gift', function()
-	return trigger_Gift()
-end})
-
 ModUtil.mod.Path.Wrap("SpawnRoomReward", function(base, eventSource, args)
 	return patch_SpawnRoomReward(base, eventSource, args)
 end)

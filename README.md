@@ -1,5 +1,7 @@
 # Multi Reward
 
+*"The gods will not be stingy with their rewards, but be careful, lest this invites the calamities of Pandora's box." -- the Nameless One*
+
 Get multiple room rewards in Hades II.
 
 It allows you to receive most room rewards multiple times, such as Boon drop, Weapon enchantment, Health drop, Mana drop, Money drop, Boss rewards, and so on.
@@ -54,7 +56,7 @@ Supporting mods:
 ## How to configure
 
 You need to modify this configuration file:
-`Hades II\Ship\ReturnOfModding\config\Abevol-MultiReward\config.toml`
+`Hades II\Ship\ReturnOfModding\config\Abevol-MultiReward.cfg`
 
 If you encounter a droppable item in the game that you wish to modify, you can immediately see their names highlighted in green in the console log, like this:
 `[MultiReward] RewardCount: 1, RewardType: SpellDrop, LootName: nil`
