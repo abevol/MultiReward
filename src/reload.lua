@@ -17,7 +17,7 @@ local function getRewardCount(config, rewardType, lootName)
     local v = config[rewardType]
     if type(v) == "table" then
         v = v[lootName]
-        if type(v) ~= "number" then
+        if v and type(v) ~= "number" then
             v = v["Others"]
         end
     end
