@@ -48,8 +48,8 @@ Mod loader:
 Supporting mods:
 [SGG_Modding-DemonDaemon-1.1.0]
 [SGG_Modding-ModUtil-3.1.1]
-[SGG_Modding-ENVY-1.0.0]
-[SGG_Modding-Chalk-2.0.2]
+[SGG_Modding-ENVY-1.0.1]
+[SGG_Modding-Chalk-2.1.1]
 [SGG_Modding-SJSON-1.0.0]
 [SGG_Modding-ReLoad-1.0.1]
 
@@ -106,7 +106,7 @@ Others = 3
 [Hell2Modding-Hell2Modding-1.0.28]: https://thunderstore.io/package/download/Hell2Modding/Hell2Modding/1.0.28/
 [SGG_Modding-DemonDaemon-1.1.0]: https://thunderstore.io/package/download/SGG_Modding/DemonDaemon/1.1.0/
 [SGG_Modding-ModUtil-3.1.1]: https://thunderstore.io/package/download/SGG_Modding/ModUtil/3.1.1/
-[SGG_Modding-ENVY-1.0.0]: https://thunderstore.io/package/download/SGG_Modding/ENVY/1.0.0/
-[SGG_Modding-Chalk-2.0.2]: https://thunderstore.io/package/download/SGG_Modding/Chalk/2.0.2/
+[SGG_Modding-ENVY-1.0.1]: https://thunderstore.io/package/download/SGG_Modding/ENVY/1.0.1/
+[SGG_Modding-Chalk-2.1.1]: https://thunderstore.io/package/download/SGG_Modding/Chalk/2.1.1/
 [SGG_Modding-SJSON-1.0.0]: https://thunderstore.io/package/download/SGG_Modding/SJSON/1.0.0/
 [SGG_Modding-ReLoad-1.0.1]: https://thunderstore.io/package/download/SGG_Modding/ReLoad/1.0.1/
