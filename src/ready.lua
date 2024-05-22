@@ -12,9 +12,9 @@ ModUtil.mod.Path.Wrap("SpawnRoomReward", function(base, eventSource, args)
 end)
 
 ModUtil.mod.Path.Wrap("ReachedMaxGods", function(base, excludedGods)
-	return false
+	return patch_ReachedMaxGods(base, excludedGods)
 end)
 
-ModUtil.mod.Path.Wrap("GetReplacementTraits", function(base, traitNames, onlyFromLootName)
-	return patch_GetReplacementTraits(base, traitNames, onlyFromLootName)
+ModUtil.mod.Path.Wrap("HandleUpgradeChoiceSelection", function(base, screen, button, args)
+	return patch_HandleUpgradeChoiceSelection(base, screen, button, args)
 end)

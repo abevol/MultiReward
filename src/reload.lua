@@ -5,13 +5,6 @@
 -- this file will be reloaded if it changes during gameplay,
 -- 	so only assign to values or define things here.
 
-local function printMsg(text)
-    if not Config.Debug then return end
-    local green = "\x1b[32m"
-    local reset = "\x1b[0m"
-    print(green .. "[MultiReward] " .. text .. reset)
-end
-
 -- local function getRewardCount(config, rewardType, lootName)
 --     local v = config[rewardType] or config["Others"]
 --     if type(v) == "table" then
@@ -54,6 +47,20 @@ function patch_SpawnRoomReward(base, eventSource, args)
     return reward
 end
 
-function patch_GetReplacementTraits(base, traitNames, onlyFromLootName)
-	return {}
+function patch_ReachedMaxGods(base, excludedGods)
+    if Config.RemoveMaxGodsLimits then
+        return false
+    end
+    return base(excludedGods)
+end
+
+function patch_HandleUpgradeChoiceSelection(base, screen, button, args)
+	args = args or {}
+	local upgradeData = button.Data
+
+    if Config.AvoidReplacingTraits and upgradeData.TraitToReplace then
+        upgradeData.TraitToReplace = nil
+    end
+
+    base(screen, button, args)
 end
