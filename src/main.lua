@@ -33,7 +33,7 @@ Chalk = mods["SGG_Modding-Chalk"]
 ReLoad = mods['SGG_Modding-ReLoad']
 
 ---@module 'config'
-Config = Chalk.auto 'plugins/config.lua'
+Config = Chalk.auto 'config.lua'
 -- ^ this updates our `.cfg` file in the config folder!
 public.config = Config -- so other mods can access our config
 
@@ -74,14 +74,14 @@ local function on_ready()
 	-- what to do when we are ready, but not re-do on reload.
 	if Config.Enabled == false then return end
 	
-	import 'plugins/ready.lua'
+	import 'ready.lua'
 end
 
 local function on_reload()
 	-- what to do when we are ready, but also again on every reload.
 	-- only do things that are safe to run over and over.
 	
-	import 'plugins/reload.lua'
+	import 'reload.lua'
 end
 
 -- this allows us to limit certain functions to not be reloaded.
