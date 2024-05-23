@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.7] - 2024-05-23
+
 ### Fixed
 
 - Fixed issue of directly jumping to the second level in express route.
@@ -66,7 +68,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First version of the mod!
 
-[unreleased]: https://github.com/abevol/MultiReward/compare/1.0.6...HEAD
+[unreleased]: https://github.com/abevol/MultiReward/compare/1.0.7...HEAD
+[1.0.7]: https://github.com/abevol/MultiReward/compare/1.0.6...1.0.7
 [1.0.6]: https://github.com/abevol/MultiReward/compare/1.0.5...1.0.6
 [1.0.5]: https://github.com/abevol/MultiReward/compare/1.0.4...1.0.5
 [1.0.4]: https://github.com/abevol/MultiReward/compare/1.0.3...1.0.4
