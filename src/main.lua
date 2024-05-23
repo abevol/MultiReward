@@ -37,11 +37,12 @@ Config = Chalk.auto 'config.lua'
 -- ^ this updates our `.cfg` file in the config folder!
 public.config = Config -- so other mods can access our config
 
-function printMsg(text)
+function printMsg(fmt, ...)
     if not Config.Debug then return end
+    local text = string.format(fmt, ...)
     local green = "\x1b[32m"
     local reset = "\x1b[0m"
-    print(green .. "[MultiReward] " .. text .. reset)
+    print(green .. text .. reset)
 end
 
 function dumpTable(tbl, indent)

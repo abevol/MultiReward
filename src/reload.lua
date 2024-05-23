@@ -14,6 +14,9 @@
 -- end
 
 local function getRewardCount(config, rewardType, lootName)
+    if not rewardType then
+        return 1
+    end
     local v = config[rewardType]
     if type(v) == "table" then
         v = v[lootName]
@@ -39,7 +42,12 @@ function patch_SpawnRoomReward(base, eventSource, args)
     local lootName = args.LootName or currentRoom.ForceLootName
     local rewardCount = getRewardCount(Config.RewardCount, rewardType, lootName)
 
-    printMsg(string.format("RewardCount: %d, RewardType: %s, LootName: %s", rewardCount, rewardType, lootName))
+    local debugMsg = string.format("RewardCount: %d, RewardType: %s", rewardCount, rewardType)
+    if lootName then
+        debugMsg = debugMsg .. ", LootName: " .. lootName
+    end
+    printMsg("%s", debugMsg)
+    -- ModUtil.mod.Hades.PrintOverhead(debugMsg, 6)
 
     for _ = 1,  rewardCount do
         reward = base(eventSource, args)

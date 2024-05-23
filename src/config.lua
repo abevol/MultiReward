@@ -8,6 +8,7 @@ return {
         Story = 1, -- no effect
         Shop = 1, -- no effect
         SpellDrop = 1, -- greater than 1 grants more Hex.
+        ClockworkGoal = 1,
         TalentDrop = 2, -- keep the setting moderate; too many talent points may prevent closing the talent upgrade interface.
         StackUpgrade = 3, -- this is the Pom rewards count.
         WeaponUpgrade = 3,
