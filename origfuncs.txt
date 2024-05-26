@@ -1,0 +1,286 @@
+function TraitTrayUpdatePinLocations( screen, args )
+	args = args or {}
+	local pinSpacing = TraitTrayCalcPinSpacing( screen )
+	--DebugPrint({ Text = "pinSpacing = "..pinSpacing })
+	for index, pin in ipairs( screen.Pins ) do
+		local toSlideIds = GetAllIds( pin.Components )
+		if pin.Components.PinIndicator ~= nil then
+			RemoveValueAndCollapse( toSlideIds, pin.Components.PinIndicator.Id )
+		end
+		if pin.Components.LockOverlay ~= nil then
+			RemoveValueAndCollapse( toSlideIds, pin.Components.LockOverlay.Id )
+		end
+		local groupName = "TraitTrayHover"..index
+		local newOffsetY = screen.PinOffsetY + (ScreenCenterNativeOffsetY * 2) + ((index - 1) * pinSpacing)
+		--DebugPrint({ Text = "index = "..index..", newOffsetY = "..newOffsetY })
+		local prevOffsetY = pin.Button.PinOffsetY
+		local offsetYDelta = newOffsetY - prevOffsetY
+		if offsetYDelta ~= 0 then
+			--DebugPrint({ Text = "index = "..index.." - offsetYDelta = "..offsetYDelta })
+			local angle = 270
+			if offsetYDelta < 0 then
+				angle = 90
+			end
+			Move({ Ids = toSlideIds, Angle = angle, Distance = math.abs(offsetYDelta), Speed = args.PinCollapseSpeed or screen.PinCollapseSpeed, SmoothStep = true, Additive = true })
+			pin.Button.PinOffsetY = newOffsetY
+			AddToGroup({ Ids = toSlideIds, Name = groupName, DrawGroup = true })
+		end
+	end
+end
+
+function PinTraitDetails( screen, button, args )
+
+	args = args or {}
+
+	if args.RemoveHovers then
+		-- Remove the previous hover
+		for k, pin in pairs( screen.Pins ) do
+			if pin.Button.PinFromHover then
+				thread( PinTraitDetails, screen, pin.Button, { Hover = true, RemoveOnly = true, } )
+				break
+			end
+		end
+	end
+
+	if button == nil then
+		return
+	end
+
+	if button.PinIndex ~= nil then
+
+		if args.Hover and not button.PinFromHover then
+			-- Pin was locked in, don't remove from hover off
+			return
+		end
+
+		local fadeOutTime = 0.2
+
+		if not args.Hover then
+			local components = screen.Pins[button.PinIndex].Components
+			if button.PinFromHover then
+				-- Pin it
+				button.PinFromHover = false
+				if components.PinIndicator == nil then
+					components.PinIndicator = CreateScreenComponent({ Name = "BlankObstacle", Group = "Combat_Menu_TraitTray_Overlay", Scale = 0.5 })
+					components.PinIndicatorDetails = CreateScreenComponent({ Name = "BlankObstacle", Group = "Combat_Menu_TraitTray_Overlay", })
+				end
+				Attach({ Id = components.PinIndicator.Id, DestinationId = button.Id })
+				SetAnimation({ DestinationId = components.PinIndicator.Id, Name = "TraitPinIn" })
+				SetAnimation({ DestinationId = components.PinIndicatorDetails.Id, Name = button.HighlightAnim or "TraitTray_Highlight" })
+				SetScale({ Id = components.PinIndicatorDetails.Id, Fraction = button.HighlightAnimScale })
+				Attach({ Id = components.PinIndicatorDetails.Id, DestinationId = components.Icon.Id })
+				TraitTrayPinOnPresentation( screen, button )
+				return
+			else
+				-- Unpin it
+				button.PinFromHover = true
+				SetAnimation({ DestinationId = components.PinIndicator.Id, Name = "TraitPinOut" })
+				SetAnimation({ DestinationId = components.PinIndicatorDetails.Id, Name = "Blank" })
+				TraitTrayPinOffPresentation( screen, button )
+				if not args.RemoveCompletely then
+					return
+				end
+			end
+		end
+
+		-- Toggle off
+		local pin = screen.Pins[button.PinIndex]
+		local componentIds = GetAllIds( pin.Components )
+		SetAlpha({ Ids = componentIds, Fraction = 0, Duration = fadeOutTime })
+		ModifyTextBox({ Ids = componentIds, FadeTarget = 0, FadeDuration = fadeOutTime })
+
+		-- Slide others up
+		for index, pin in ipairs( screen.Pins ) do
+			if button.PinIndex ~= nil and index > button.PinIndex and pin.Button ~= nil and pin.Button.PinIndex ~= nil then
+				pin.Button.PinIndex = pin.Button.PinIndex - 1
+			end
+		end
+		RemoveIndexAndCollapse( screen.Pins, button.PinIndex )
+		button.PinIndex = nil
+		if not args.RemoveCompletely then
+			TraitTrayUpdatePinLocations( screen, args )
+		end
+
+		waitUnmodified( fadeOutTime )
+		Destroy({ Ids = componentIds })
+		return
+	end
+
+	if args.RemoveOnly then
+		return
+	end
+
+	if #screen.Pins >= screen.MaxPins then
+		return
+	end
+
+	local pinIndex = #screen.Pins + 1
+	button.PinIndex = pinIndex
+	button.PinFromHover = args.Hover
+	local components = {}
+	screen.Pins[pinIndex] = {}
+	screen.Pins[pinIndex].Components = components
+	screen.Pins[pinIndex].Button = button
+
+	local offset =
+	{
+		X = screen.PinOffsetX,
+		Y = screen.PinOffsetY + (ScreenCenterNativeOffsetY * 2),
+	}
+	local pinSpacing = TraitTrayCalcPinSpacing( screen )
+	offset.Y = offset.Y + ((pinIndex - 1) * pinSpacing)
+	button.PinOffsetY = offset.Y
+	local groupName = "TraitTrayHover"..pinIndex
+
+	local titleBoxYOffset = -20
+	local textOffset = -70 - 350
+
+	local backingAnim = button.TraitData.InfoBackingAnimation or ScreenData.UpgradeChoice.RarityBackingAnimations[button.TraitData.Rarity]
+	--DebugPrint({ Text = "backignAnim = "..tostring(backignAnim) })
+	components.DetailsBacking = CreateScreenComponent({ Name = "BoonSlotBase", Group = groupName, X = offset.X, Y = offset.Y + 200, Animation = backingAnim })
+	SetInteractProperty({ DestinationId = components.DetailsBacking.Id, Property = "FreeFormSelectable", Value = false })
+	local detailsData = DeepCopyTable( ScreenData.UpgradeChoice.DescriptionText )
+	detailsData.Id = components.DetailsBacking.Id
+	detailsData.BlockTooltip = true
+	CreateTextBoxWithFormat( detailsData )
+
+	components.BlessingBacking = CreateScreenComponent({ Name = "BlankObstacle", Group = groupName, X = offset.X, Y = offset.Y + 200 })
+	local blessingData = DeepCopyTable( ScreenData.UpgradeChoice.DescriptionText )
+	blessingData.Id = components.BlessingBacking.Id
+	blessingData.OffsetY =  screen.BlessingOffsetY
+	blessingData.AppendToId = components.DetailsBacking.Id
+	CreateTextBoxWithFormat( blessingData )
+
+	components.StatlineBackings = {}
+	for lineNum = 1, 2 do
+
+		screen.LineHeight = ScreenData.UpgradeChoice.LineHeight
+
+		local columnOffset = math.abs( (ScreenData.UpgradeChoice.StatLineRight.OffsetX or 0) - (ScreenData.UpgradeChoice.StatLineLeft.OffsetX or 0) )
+		local offsetY = (lineNum - 1) * screen.LineHeight
+		local statLineKey = "StatlineBackings"..lineNum
+		components[statLineKey.."Left"] = CreateScreenComponent({ Name = "BlankObstacle", Group = groupName, X = offset.X + textOffset, Y = offset.Y + 200 })
+
+		local statLineLeft = ShallowCopyTable( ScreenData.UpgradeChoice.StatLineLeft )
+		statLineLeft.Id = components[statLineKey.."Left"].Id
+		statLineLeft.OffsetX = 0
+		statLineLeft.OffsetY = offsetY
+		CreateTextBoxWithFormat( statLineLeft )
+
+		components[statLineKey.."Right"] = CreateScreenComponent({ Name = "BlankObstacle", Group = groupName, X = offset.X + textOffset, Y = offset.Y + 200 })
+		local statLineRight = ShallowCopyTable( ScreenData.UpgradeChoice.StatLineRight )
+		statLineRight.Id = components[statLineKey.."Right"].Id
+		statLineRight.OffsetX = (statLineRight.OffsetX or 0) + columnOffset
+		statLineRight.OffsetY = offsetY
+		CreateTextBoxWithFormat( statLineRight )
+		table.insert( components.StatlineBackings, { components[statLineKey.."Left"].Id, components[statLineKey.."Right"].Id } )
+	end
+	components.TitleBox = CreateScreenComponent({ Name = "BlankObstacle", Group = groupName, X = offset.X + textOffset, Y = offset.Y + 170 })
+	CreateTextBox(MergeTables({
+		Id = components.TitleBox.Id,
+		FontSize = 25,
+		OffsetY = -17 + titleBoxYOffset,
+		Color = color,
+		Font = "P22UndergroundSCMedium",
+		ShadowBlur = 0, ShadowColor = {0,0,0,1}, ShadowOffset={0, 2},
+		Justification = "Left",
+	}, LocalizationData.TraitTrayScripts.TitleBox))
+
+	components.RarityBox = CreateScreenComponent({ Name = "BlankObstacle", Group = groupName, X = offset.X, Y = offset.Y + 200 })
+	local rarityTextBox = ShallowCopyTable( ScreenData.UpgradeChoice.RarityText )
+	rarityTextBox.Id = components.RarityBox.Id
+	CreateTextBox( rarityTextBox )
+	
+	components.FlavorText = CreateScreenComponent({ Name = "BlankObstacle", Group = groupName, X = offset.X, Y = offset.Y})
+	
+	CreateTextBox( 
+		MergeTables(
+		{ 
+			Id = components.FlavorText.Id,
+		},
+		ScreenData.UpgradeChoice.FlavorText ))
+	Attach({ Id = components.FlavorText.Id, DestinationId = components.DetailsBacking.Id })
+
+	local iconOffsetX = ScreenData.UpgradeChoice.IconoffsetX
+	local iconOffsetY = ScreenData.UpgradeChoice.IconoffsetX
+	local iconOffset = { X = -447, Y = 135 }
+	local overlayLayer = "Combat_Menu_Overlay_Backing"
+
+	if button.TraitData.MetaUpgrade then
+		components.Frame = CreateScreenComponent({ Name = "BlankObstacle", Group = groupName, X = offset.X + iconOffset.X, Y = offset.Y + iconOffset.Y, Scale = button.PinIconFrameScale, Animation = "DevCard_EquippedHighlight" })
+	end
+
+	if button.Icon ~= nil or button.TraitData.Icon ~= nil then
+		components.Icon = CreateScreenComponent({ Name = "BlankObstacle", Group = groupName, X = offset.X + iconOffset.X, Y = offset.Y + iconOffset.Y, Scale = button.PinIconScale })
+		SetAnimation({ DestinationId = components.Icon.Id, Name = button.Icon or button.TraitData.Icon })
+	end
+	
+	if not button.TraitData.MetaUpgrade then
+		components.Frame = CreateScreenComponent({ Name = "BlankObstacle", Group = groupName, X = offset.X + iconOffset.X, Y = offset.Y + iconOffset.Y, Scale = button.PinIconFrameScale })
+		local frameAnim = GetTraitFrame( button.TraitData )
+		if frameAnim ~= nil then
+			SetAnimation({ DestinationId = components.Frame.Id, Name = frameAnim })
+		end
+	end
+
+	local screenData = ScreenData.UpgradeChoice
+
+	if not IsEmpty( button.TraitData.Elements ) and IsGameStateEligible( CurrentRun, TraitRarityData.ElementalGameStateRequirements ) then
+		local elementName = GetFirstValue( button.TraitData.Elements )
+		components.ElementalIcon = CreateScreenComponent({ Name = TraitElementData[elementName].Icon, Group = groupName, Scale = 0.5 })
+		Attach({ Id = components.ElementalIcon.Id, DestinationId = components.DetailsBacking.Id, OffsetX = screenData.ElementIcon.XShift - 320, OffsetY = screenData.ElementIcon.YShift + 14 })
+	end
+
+	if not args.Hover then
+		-- Immediately Pin it
+		if components.PinIndicator == nil then
+			components.PinIndicator = CreateScreenComponent({ Name = "BlankObstacle", Group = groupName, Scale = 0.5 })
+			components.PinIndicatorDetails = CreateScreenComponent({ Name = "BlankObstacle", Group = groupName, Scale = 0.8 })
+		end
+		Attach({ Id = components.PinIndicator.Id, DestinationId = button.Id })
+		if button.TraitData.Slot == "Assist" or button.TraitData.Slot == "Keepsake" then
+			SetAnimation({ DestinationId = components.PinIndicator.Id, Name = "TraitPinIn_NoHighlight" })
+		else
+			SetAnimation({ DestinationId = components.PinIndicator.Id, Name = "TraitPinIn" })
+		end
+		Attach({ Id = components.PinIndicatorDetails.Id, DestinationId = components.Icon.Id })
+		SetAnimation({ DestinationId = components.PinIndicatorDetails.Id, Name = "Blank" })
+		TraitTrayPinOnPresentation( screen, button )
+	end
+
+	SetTraitTextData( button.TraitData, { OldOnly = true } )
+	
+	local showingTrait = nil
+	local rarityValue = 0
+	for s, existingTrait in pairs( CurrentRun.Hero.Traits) do
+		if (AreTraitsIdentical(existingTrait, button.TraitData) and rarityValue < GetRarityValue( existingTrait.Rarity )) then
+			showingTrait = existingTrait
+			rarityValue = GetRarityValue( showingTrait.Rarity )
+		end
+	end
+	if showingTrait then
+		button.OverrideRarity = showingTrait.Rarity
+	end
+	SetTraitTrayDetails(
+	{ 
+		Button = button, 
+		DetailsBox = components.DetailsBacking,
+		BlessingsBox = components.BlessingBacking,
+		DetailTextArgs = textArgs,
+		RarityBox = components.RarityBox, 
+		TitleBox = components.TitleBox, 
+		--Patch = components.Patch, 
+		Icon = components.Icon, 
+		StatLines = components.StatlineBackings,
+		ElementalIcon = components.ElementalIcon,
+		FlavorText = components.FlavorText,
+	})
+
+	if button.ShrineDisabled then
+		components.LockOverlay = CreateScreenComponent({ Name = "BaseInteractableButton", Group = "Combat_Menu_TraitTray_Overlay", Animation = "ShrineSlotLocked" })
+		Attach({ Id = components.LockOverlay.Id, DestinationId = components.DetailsBacking.Id })
+	end
+
+	TraitTrayUpdatePinLocations( screen, args )
+
+end

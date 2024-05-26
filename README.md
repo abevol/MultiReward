@@ -16,9 +16,13 @@ You can also set the reward count for each reward type.
 2. Remove MaxGods limits.
     Now with every expedition into the night, you can receive the boons of all gods, not the previous limit of four gods.
 3. Avoid replacing traits.
-    Now you can have multiple boons of the same type simultaneously without worrying about the previous ones being replaced.
+    Now you can have multiple boons of the same slot simultaneously without worrying about the previous ones being replaced.
 
-## Installation Tutorial
+## Automatic Installation
+
+Use the [internal-build-of-r2modman].
+
+## Manual Installation
 
 1. Install the mod loader.
 Place the main Hell2Modding file, called d3d12.dll, next to the game executable called Hades2.exe inside the game folder.
@@ -36,22 +40,18 @@ And so on, the same applies to other mods.
 
 4. Now you can launch the game again, and if there are no surprises, all the mods should start to work.
 
-## Mod Loader
-
-Suggest using [Hell2Modding].
-
 ## Requirements
 
 Mod loader:
-[Hell2Modding-Hell2Modding-1.0.28]
+[Hell2Modding-Hell2Modding]
 
-Supporting mods:
-[SGG_Modding-DemonDaemon-1.1.0]
-[SGG_Modding-ModUtil-3.1.1]
-[SGG_Modding-ENVY-1.0.1]
-[SGG_Modding-Chalk-2.1.1]
-[SGG_Modding-SJSON-1.0.0]
-[SGG_Modding-ReLoad-1.0.1]
+Dependencies:
+[SGG_Modding-DemonDaemon]
+[SGG_Modding-ModUtil]
+[SGG_Modding-ENVY]
+[SGG_Modding-Chalk]
+[SGG_Modding-SJSON]
+[SGG_Modding-ReLoad]
 
 ## How to configure
 
@@ -102,11 +102,11 @@ HephaestusUpgrade = 3
 Others = 3
 ```
 
-[Hell2Modding]: https://thunderstore.io/c/hades-ii/p/Hell2Modding/Hell2Modding/
-[Hell2Modding-Hell2Modding-1.0.28]: https://thunderstore.io/package/download/Hell2Modding/Hell2Modding/1.0.28/
-[SGG_Modding-DemonDaemon-1.1.0]: https://thunderstore.io/package/download/SGG_Modding/DemonDaemon/1.1.0/
-[SGG_Modding-ModUtil-3.1.1]: https://thunderstore.io/package/download/SGG_Modding/ModUtil/3.1.1/
-[SGG_Modding-ENVY-1.0.1]: https://thunderstore.io/package/download/SGG_Modding/ENVY/1.0.1/
-[SGG_Modding-Chalk-2.1.1]: https://thunderstore.io/package/download/SGG_Modding/Chalk/2.1.1/
-[SGG_Modding-SJSON-1.0.0]: https://thunderstore.io/package/download/SGG_Modding/SJSON/1.0.0/
-[SGG_Modding-ReLoad-1.0.1]: https://thunderstore.io/package/download/SGG_Modding/ReLoad/1.0.1/
+[internal-build-of-r2modman]: https://github.com/xiaoxiao921/r2modmanPlus/releases/
+[Hell2Modding-Hell2Modding]: https://thunderstore.io/c/hades-ii/p/Hell2Modding/Hell2Modding/
+[SGG_Modding-DemonDaemon]: https://thunderstore.io/c/hades-ii/p/SGG_Modding/DemonDaemon/
+[SGG_Modding-ModUtil]: https://thunderstore.io/c/hades-ii/p/SGG_Modding/ModUtil/
+[SGG_Modding-ENVY]: https://thunderstore.io/c/hades-ii/p/SGG_Modding/ENVY/
+[SGG_Modding-Chalk]: https://thunderstore.io/c/hades-ii/p/SGG_Modding/Chalk/
+[SGG_Modding-SJSON]: https://thunderstore.io/c/hades-ii/p/SGG_Modding/SJSON/
+[SGG_Modding-ReLoad]: https://thunderstore.io/c/hades-ii/p/SGG_Modding/ReLoad/

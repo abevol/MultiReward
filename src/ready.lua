@@ -18,3 +18,15 @@ end)
 ModUtil.mod.Path.Wrap("HandleUpgradeChoiceSelection", function(base, screen, button, args)
 	return patch_HandleUpgradeChoiceSelection(base, screen, button, args)
 end)
+
+ModUtil.mod.Path.Wrap("TraitTrayCalcPinSpacing", function(base, screen)
+	return patch_TraitTrayCalcPinSpacing(base, screen)
+end)
+
+ModUtil.mod.Path.Wrap("TraitTrayUpdatePinLocations", function(base, screen, args)
+	return patch_TraitTrayUpdatePinLocations(base, screen, args)
+end)
+
+ModUtil.mod.Path.Wrap("PinTraitDetails", function(base, screen, button, args)
+	return patch_PinTraitDetails(base, screen, button, args)
+end)
