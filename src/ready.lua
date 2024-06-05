@@ -7,8 +7,16 @@
 -- 	so you will most likely want to have it reference
 --	values and functions later defined in `reload.lua`.
 
+ModUtil.mod.Path.Wrap("DoPatches", function(base)
+	return patch_DoPatches(base)
+end)
+
 ModUtil.mod.Path.Wrap("SpawnRoomReward", function(base, eventSource, args)
 	return patch_SpawnRoomReward(base, eventSource, args)
+end)
+
+ModUtil.mod.Path.Wrap("SpawnStoreItemInWorld", function(base, itemData, kitId)
+	return patch_SpawnStoreItemInWorld(base, itemData, kitId)
 end)
 
 ModUtil.mod.Path.Wrap("ReachedMaxGods", function(base, excludedGods)

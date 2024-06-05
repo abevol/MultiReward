@@ -33,6 +33,29 @@ local function getRewardCount(config, rewardType, lootName)
     return v
 end
 
+function patch_DoPatches(base)
+	base()
+	if not Config.LowerShopPrices then
+		return
+	end
+
+	if GameState ~= nil and CurrentRun.Hero ~= nil then
+		OverwriteTableKeys(TraitData, {
+			MultiTraitCostReduction = {
+				Icon = "Keepsake_34",
+				InheritFrom = { "BaseTrait" },
+				BlockInRunRarify = true,
+				StoreCostMultiplier = 1 / Config.RewardCount["Shop"],
+				DisplayName = "Titanic Economy",
+      			Description = "All shop prices are massively reduced."
+			}
+		})
+		printMsg("%s %s%s", "Added shop price reduction by", tostring(100 - 100 / Config.RewardCount["Shop"]), "%")
+		ProcessDataInheritance(TraitData.MultiTraitCostReduction, TraitData)
+		AddTrait(CurrentRun.Hero, "MultiTraitCostReduction", "Common")
+	end
+end
+
 function patch_SpawnRoomReward(base, eventSource, args)
 	args = args or {}
     local reward = nil
@@ -53,6 +76,16 @@ function patch_SpawnRoomReward(base, eventSource, args)
         reward = base(eventSource, args)
     end
     return reward
+end
+
+function patch_SpawnStoreItemInWorld(base, itemData, kitId)
+	local reward = nil
+	local rewardCount = Config.RewardCount["Shop"];
+
+	for _ = 1, rewardCount do
+		reward = base(itemData, kitId)
+	end
+	return reward
 end
 
 function patch_ReachedMaxGods(base, excludedGods)
