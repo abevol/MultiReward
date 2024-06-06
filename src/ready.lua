@@ -7,8 +7,8 @@
 -- 	so you will most likely want to have it reference
 --	values and functions later defined in `reload.lua`.
 
-ModUtil.mod.Path.Wrap("DoPatches", function(base)
-	return patch_DoPatches(base)
+ModUtil.mod.Path.Wrap("StartNewRun", function(base, prevRun, args)
+	return patch_StartNewRun(base, prevRun, args)
 end)
 
 ModUtil.mod.Path.Wrap("SpawnRoomReward", function(base, eventSource, args)

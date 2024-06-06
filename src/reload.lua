@@ -33,12 +33,10 @@ local function getRewardCount(config, rewardType, lootName)
     return v
 end
 
-function patch_DoPatches(base)
-	base()
-	if not Config.LowerShopPrices then
-		return
-	end
+function patch_StartNewRun(base, prevRun, args)
+	local currentRun = base(prevRun, args)
 
+	printMsg("%s", "HOOKED")
 	if GameState ~= nil and CurrentRun.Hero ~= nil then
 		OverwriteTableKeys(TraitData, {
 			MultiTraitCostReduction = {
@@ -54,6 +52,7 @@ function patch_DoPatches(base)
 		ProcessDataInheritance(TraitData.MultiTraitCostReduction, TraitData)
 		AddTrait(CurrentRun.Hero, "MultiTraitCostReduction", "Common")
 	end
+	return currentRun
 end
 
 function patch_SpawnRoomReward(base, eventSource, args)
