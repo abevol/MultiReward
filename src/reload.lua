@@ -40,6 +40,7 @@ function patch_StartNewRun(base, prevRun, args)
 	if GameState ~= nil and CurrentRun.Hero ~= nil then
 		OverwriteTableKeys(TraitData, {
 			MultiTraitCostReduction = {
+				Hidden = true,
 				Icon = "Keepsake_34",
 				InheritFrom = { "BaseTrait" },
 				BlockInRunRarify = true,
