@@ -37,7 +37,7 @@ function patch_StartNewRun(base, prevRun, args)
 	local currentRun = base(prevRun, args)
 
 	printMsg("%s", "HOOKED")
-	if GameState ~= nil and CurrentRun.Hero ~= nil then
+	if GameState ~= nil and CurrentRun.Hero ~= nil and Config.LowerShopPrices then
 		local storeCostMultiplier = 1 / Config.RewardCount.Others
 		if Config.RewardCount.Shop.Others then storeCostMultiplier = 1 / Config.RewardCount.Shop.Others end
 		local discountConfig = Config.RewardCount.Shop.DiscountPercent
