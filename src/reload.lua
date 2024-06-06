@@ -38,15 +38,18 @@ function patch_StartNewRun(base, prevRun, args)
 
 	printMsg("%s", "HOOKED")
 	if GameState ~= nil and CurrentRun.Hero ~= nil then
+		local storeCostMultiplier = 1 / Config.RewardCount.Others
+		if Config.RewardCount.Shop.Others then storeCostMultiplier = 1 / Config.RewardCount.Shop.Others end
+		local discountConfig = Config.RewardCount.Shop.DiscountPercent
+		if discountConfig and discountConfig >= 0 and discountConfig <= 100 then storeCostMultiplier = (100 - discountConfig) / 100 end
+
 		OverwriteTableKeys(TraitData, {
 			MultiTraitCostReduction = {
 				Hidden = true,
-				Icon = "Keepsake_34",
+				Icon = "Boon_Poseidon_33",
 				InheritFrom = { "BaseTrait" },
 				BlockInRunRarify = true,
-				StoreCostMultiplier = 1 / Config.RewardCount["Shop"],
-				DisplayName = "Titanic Economy",
-      			Description = "All shop prices are massively reduced."
+				StoreCostMultiplier = storeCostMultiplier
 			}
 		})
 		printMsg("%s %s%s", "Added shop price reduction by", tostring(100 - 100 / Config.RewardCount["Shop"]), "%")
@@ -80,8 +83,38 @@ end
 
 function patch_SpawnStoreItemInWorld(base, itemData, kitId)
 	local reward = nil
-	local rewardCount = Config.RewardCount["Shop"];
+	local rewardCount = Config.RewardCount["Others"]
 
+	local boonConfig = Config.RewardCount.Boon
+	local shopConfig = Config.RewardCount.Shop
+	if shopConfig.Others then rewardCount = shopConfig.Others end
+
+	if itemData.Name == "WeaponUpgradeDrop" then
+		if Config.RewardCount.WeaponUpgrade then rewardCount = Config.RewardCount.WeaponUpgrade end
+		if shopConfig.WeaponUpgradeDrop then rewardCount = shopConfig.WeaponUpgradeDrop end
+	elseif itemData.Name =="ShopHermesUpgrade" then
+		if Config.RewardCount.HermesUpgrade then rewardCount = Config.RewardCount.HermesUpgrade end
+		if shopConfig.ShopHermesUpgrade then rewardCount = shopConfig.ShopHermesUpgrade end
+	elseif itemData.Name =="ShopManaUpgrade" then
+		if Config.RewardCount.MaxManaDrop then rewardCount = Config.RewardCount.MaxManaDrop end
+		if shopConfig.ShopManaUpgrade then rewardCount = shopConfig.ShopManaUpgrade end
+	elseif itemData.Type == "Consumable" then
+		if itemData.Name == "BlindBoxLoot" then
+			if shopConfig.Boon then rewardCount = shopConfig.Boon end
+		else
+			if Config.RewardCount[itemData.Name] then rewardCount = Config.RewardCount[itemData.Name] end
+			if shopConfig.Consumable then rewardCount = shopConfig.Consumable end
+			if shopConfig[itemData.Name] then rewardCount = shopConfig[itemData.Name] end
+		end
+	elseif itemData.Type == "Boon" then
+		local boonName = itemData.Name
+		if boonName == "RandomLoot" and itemData.Args and itemData.Args.ForceLootName then boonName = itemData.Args.ForceLootName end
+		if Config.RewardCount[boonName] then rewardCount = boonConfig[boonName] end
+		if shopConfig.Boon then rewardCount = shopConfig.Boon end
+		if shopConfig[boonName] then rewardCount = shopConfig[boonName] end
+	end
+
+	printMsg("%s", dumpTable(itemData))
 	for _ = 1, rewardCount do
 		reward = base(itemData, kitId)
 	end
