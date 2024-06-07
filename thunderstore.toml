@@ -4,18 +4,18 @@ schemaVersion = "0.0.1"
 [package]
 namespace = "Abevol"
 name = "MultiReward"
-versionNumber = "1.0.8"
+versionNumber = "1.1.0"
 description = "Get multiple room rewards."
 websiteUrl = "https://github.com/abevol/MultiReward"
 containsNsfwContent = false
 
 [package.dependencies]
-Hell2Modding-Hell2Modding = "1.0.30"
-SGG_Modding-ENVY = "1.0.1"
+Hell2Modding-Hell2Modding = "1.0.39"
+SGG_Modding-ENVY = "1.1.0"
 SGG_Modding-Chalk = "2.1.1"
 SGG_Modding-ReLoad = "1.0.2"
 SGG_Modding-SJSON = "1.0.0"
-SGG_Modding-ModUtil = "3.1.1"
+SGG_Modding-ModUtil = "4.0.0"
 
 [build]
 icon = "./icon.png"

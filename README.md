@@ -13,9 +13,11 @@ You can also set the reward count for each reward type.
 ## Features
 
 1. Multiple rewards.
-2. Remove MaxGods limits.
+2. Multiple shop items.
+3. Lower shop prices.
+4. Remove MaxGods limits.
     Now with every expedition into the night, you can receive the boons of all gods, not the previous limit of four gods.
-3. Avoid replacing traits.
+5. Avoid replacing traits.
     Now you can have multiple boons of the same slot simultaneously without worrying about the previous ones being replaced.
 
 ## Automatic Installation
@@ -74,10 +76,12 @@ Then you can configure it like this:
 ## Config Example
 
 ```ini
-Debug = true
+Debug = false
 Enabled = true
 AvoidReplacingTraits = true
 RemoveMaxGodsLimits = true
+LowerShopPrices = true
+ShopDiscountPercent = 67
 
 [RewardCount]
 HermesUpgrade = 3

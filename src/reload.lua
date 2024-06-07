@@ -36,12 +36,12 @@ end
 function patch_StartNewRun(base, prevRun, args)
 	local currentRun = base(prevRun, args)
 
-	printMsg("%s", "HOOKED")
 	if GameState ~= nil and CurrentRun.Hero ~= nil and Config.LowerShopPrices then
-		local storeCostMultiplier = 1 / Config.RewardCount.Others
-		if Config.RewardCount.Shop.Others then storeCostMultiplier = 1 / Config.RewardCount.Shop.Others end
-		local discountConfig = Config.RewardCount.Shop.DiscountPercent
-		if discountConfig and discountConfig >= 0 and discountConfig <= 100 then storeCostMultiplier = (100 - discountConfig) / 100 end
+		local storeCostMultiplier = 1 / Config.ShopItemCount.Others
+		local discountConfig = Config.ShopDiscountPercent
+		if discountConfig and discountConfig >= 0 and discountConfig <= 100 then
+			storeCostMultiplier = (100 - discountConfig) / 100
+		end
 
 		OverwriteTableKeys(TraitData, {
 			MultiTraitCostReduction = {
@@ -52,9 +52,10 @@ function patch_StartNewRun(base, prevRun, args)
 				StoreCostMultiplier = storeCostMultiplier
 			}
 		})
-		printMsg("%s %s%s", "Added shop price reduction by", tostring(100 - 100 / Config.RewardCount["Shop"]), "%")
 		ProcessDataInheritance(TraitData.MultiTraitCostReduction, TraitData)
 		AddTrait(CurrentRun.Hero, "MultiTraitCostReduction", "Common")
+
+		printMsg("Added shop price reduction by %s%%", tostring(storeCostMultiplier * 100))
 	end
 	return currentRun
 end
@@ -68,12 +69,9 @@ function patch_SpawnRoomReward(base, eventSource, args)
     local lootName = args.LootName or currentRoom.ForceLootName
     local rewardCount = getRewardCount(Config.RewardCount, rewardType, lootName)
 
-    local debugMsg = string.format("RewardCount: %d, RewardType: %s", rewardCount, rewardType)
-    if lootName then
-        debugMsg = debugMsg .. ", LootName: " .. lootName
-    end
+    local debugMsg = string.format("RewardCount: %d, RewardType: %s%s", rewardCount, rewardType, lootName and ", LootName: " .. lootName or "")
     printMsg("%s", debugMsg)
-    -- ModUtil.mod.Hades.PrintOverhead(debugMsg, 6)
+    if Config.Debug then ModUtil.mod.Hades.PrintOverhead(debugMsg, 5) end
 
     for _ = 1,  rewardCount do
         reward = base(eventSource, args)
@@ -82,43 +80,17 @@ function patch_SpawnRoomReward(base, eventSource, args)
 end
 
 function patch_SpawnStoreItemInWorld(base, itemData, kitId)
-	local reward = nil
-	local rewardCount = Config.RewardCount["Others"]
+	local spawnedItem = nil
+	local rewardCount = getRewardCount(Config.RewardCount, itemData.Type, itemData.Name)
 
-	local boonConfig = Config.RewardCount.Boon
-	local shopConfig = Config.RewardCount.Shop
-	if shopConfig.Others then rewardCount = shopConfig.Others end
+    local debugMsg = string.format("ShopItemCount: %d, Type: %s%s", rewardCount, itemData.Type, itemData.Name and ", Name: " .. itemData.Name or "")
+    printMsg("%s", debugMsg)
+    if Config.Debug then ModUtil.mod.Hades.PrintOverhead(debugMsg, 5) end
 
-	if itemData.Name == "WeaponUpgradeDrop" then
-		if Config.RewardCount.WeaponUpgrade then rewardCount = Config.RewardCount.WeaponUpgrade end
-		if shopConfig.WeaponUpgradeDrop then rewardCount = shopConfig.WeaponUpgradeDrop end
-	elseif itemData.Name =="ShopHermesUpgrade" then
-		if Config.RewardCount.HermesUpgrade then rewardCount = Config.RewardCount.HermesUpgrade end
-		if shopConfig.ShopHermesUpgrade then rewardCount = shopConfig.ShopHermesUpgrade end
-	elseif itemData.Name =="ShopManaUpgrade" then
-		if Config.RewardCount.MaxManaDrop then rewardCount = Config.RewardCount.MaxManaDrop end
-		if shopConfig.ShopManaUpgrade then rewardCount = shopConfig.ShopManaUpgrade end
-	elseif itemData.Type == "Consumable" then
-		if itemData.Name == "BlindBoxLoot" then
-			if shopConfig.Boon then rewardCount = shopConfig.Boon end
-		else
-			if Config.RewardCount[itemData.Name] then rewardCount = Config.RewardCount[itemData.Name] end
-			if shopConfig.Consumable then rewardCount = shopConfig.Consumable end
-			if shopConfig[itemData.Name] then rewardCount = shopConfig[itemData.Name] end
-		end
-	elseif itemData.Type == "Boon" then
-		local boonName = itemData.Name
-		if boonName == "RandomLoot" and itemData.Args and itemData.Args.ForceLootName then boonName = itemData.Args.ForceLootName end
-		if Config.RewardCount[boonName] then rewardCount = boonConfig[boonName] end
-		if shopConfig.Boon then rewardCount = shopConfig.Boon end
-		if shopConfig[boonName] then rewardCount = shopConfig[boonName] end
-	end
-
-	printMsg("%s", dumpTable(itemData))
 	for _ = 1, rewardCount do
-		reward = base(itemData, kitId)
+		spawnedItem = base(itemData, kitId)
 	end
-	return reward
+	return spawnedItem
 end
 
 function patch_ReachedMaxGods(base, excludedGods)

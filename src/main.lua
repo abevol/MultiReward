@@ -38,7 +38,6 @@ Config = Chalk.auto 'config.lua'
 public.config = Config -- so other mods can access our config
 
 function printMsg(fmt, ...)
-    if not Config.Debug then return end
     local text = string.format(fmt, ...)
     local green = "\x1b[32m"
     local reset = "\x1b[0m"
