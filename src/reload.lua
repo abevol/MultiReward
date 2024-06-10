@@ -19,9 +19,11 @@ local function getRewardCount(config, rewardType, lootName)
     end
     local v = config[rewardType]
     if type(v) == "table" then
-        v = v[lootName]
-        if v and type(v) ~= "number" then
-            v = v["Others"]
+        local sv = v[lootName]
+        if type(sv) == "number" then
+            v = sv
+		else
+			v = v["Others"]
         end
     end
     if type(v) ~= "number" then
@@ -81,13 +83,13 @@ end
 
 function patch_SpawnStoreItemInWorld(base, itemData, kitId)
 	local spawnedItem = nil
-	local rewardCount = getRewardCount(Config.RewardCount, itemData.Type, itemData.Name)
+	local shopItemCount = getRewardCount(Config.ShopItemCount, itemData.Type, itemData.Name)
 
-    local debugMsg = string.format("ShopItemCount: %d, Type: %s%s", rewardCount, itemData.Type, itemData.Name and ", Name: " .. itemData.Name or "")
+    local debugMsg = string.format("ShopItemCount: %d, Type: %s%s", shopItemCount, itemData.Type, itemData.Name and ", Name: " .. itemData.Name or "")
     printMsg("%s", debugMsg)
     if Config.Debug then ModUtil.mod.Hades.PrintOverhead(debugMsg, 5) end
 
-	for _ = 1, rewardCount do
+	for _ = 1, shopItemCount do
 		spawnedItem = base(itemData, kitId)
 	end
 	return spawnedItem
