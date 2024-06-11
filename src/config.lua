@@ -2,9 +2,9 @@ return {
     Enabled = true,
     Debug = true,
     RemoveMaxGodsLimits = true,
-    AvoidReplacingTraits = true,
-    LowerShopPrices = true,
-    UpgradesOptional = true,
+    AvoidReplacingTraits = true, -- Allows multiple traits on one slot
+    LowerShopPrices = true, -- Adds a shop discount
+    UpgradesOptional = true, -- lets you leave the room without picking up all rewards
     RewardCount = {
         -- Set the reward count for each 'RewardType'.
         SpellDrop = 1, -- greater than 1 grants more Hex.
@@ -20,7 +20,7 @@ return {
             Others = 3,
         },
         Shop = {
-            DiscountPercent = 67,
+            DiscountPercent = 67, -- Shop prices are lowered by this amount
             AphroditeUpgrade = 3,
             DemeterUpgrade = 3,
             HephaestusUpgrade = 3,
@@ -31,14 +31,14 @@ return {
             MaxHealthDrop = 3,
             MaxHealthDropBig = 3,
             StackUpgrade = 3,
-            StoreRewardRandomStack = 3,
+            StoreRewardRandomStack = 3, -- sliced pom
             RoomRewardHealDrop = 3,
             HealBigDrop = 3,
             ArmorBoost = 3,
             MemPointsCommonDrop = 3,
             MetaCardPointsCommonDrop = 3,
-            CardUpgradePointsDrop = 3,
-            WeaponPointsRareDrop = 3,
+            CardUpgradePointsDrop = 3, -- moondust
+            WeaponPointsRareDrop = 3, -- nightmare
             Boon = 3,
             Consumable = 3,
             Others = 3
@@ -50,10 +50,10 @@ return {
             DemeterUpgrade = 3,
             Others = 3
         },
-        GiftDrop = 3,
+        GiftDrop = 3, -- Nectar
         MetaCurrencyDrop = 3,
-        MemPointsCommonDrop = 3,
-        MetaCardPointsCommonDrop = 3,
+        MemPointsCommonDrop = 3, -- Psyche
+        MetaCardPointsCommonDrop = 3, -- Ashes
         MetaCardPointsCommonBigDrop = 3,
         RoomMoneyDrop = 3,
         RoomMoneyTinyDrop = 3,
@@ -61,12 +61,12 @@ return {
         MaxHealthDropSmall = 3,
         MaxManaDrop = 3,
         MaxManaDropSmall = 3,
-        MixerFBossDrop = 3,
-        MixerGBossDrop = 3,
-        MixerHBossDrop = 3,
-        MixerIBossDrop = 3,
-        MixerNBossDrop = 3,
-        MixerOBossDrop = 3,
+        MixerFBossDrop = 3, -- Hecate Metacurrency
+        MixerGBossDrop = 3, -- Scylla Metacurrency
+        MixerHBossDrop = 3, -- Cerberus Metacurrency
+        MixerIBossDrop = 3, -- Chronos Metacurrency
+        MixerNBossDrop = 3, -- Polyphemus Metacurrency
+        MixerOBossDrop = 3, -- Eris Metacurrency
         Others = 3 -- the 'Others' is a special key, which does not correspond to any actual drop in the game. It is solely used by mods to denote 'default values'.
     }
 }

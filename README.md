@@ -74,31 +74,73 @@ Then you can configure it like this:
 ## Config Example
 
 ```ini
-Debug = true
 Enabled = true
-AvoidReplacingTraits = true
+Debug = true
 RemoveMaxGodsLimits = true
+AvoidReplacingTraits = true
+LowerShopPrices = true
+UpgradesOptional = true
 
 [RewardCount]
+SpellDrop = 1
+ClockworkGoal = 1
+TalentDrop = 2
+StackUpgrade = 3
+WeaponUpgrade = 3
 HermesUpgrade = 3
-MaxHealthDrop = 3
-MaxManaDrop = 3
-MemPointsCommonDrop = 3
+GiftDrop = 3
 MetaCurrencyDrop = 3
+MemPointsCommonDrop = 3
+MetaCardPointsCommonDrop = 3
+MetaCardPointsCommonBigDrop = 3
+RoomMoneyDrop = 3
+RoomMoneyTinyDrop = 3
+MaxHealthDrop = 3
+MaxHealthDropSmall = 3
+MaxManaDrop = 3
+MaxManaDropSmall = 3
+MixerFBossDrop = 3
+MixerGBossDrop = 3
+MixerHBossDrop = 3
+MixerIBossDrop = 3
 MixerNBossDrop = 3
 MixerOBossDrop = 3
-RoomMoneyDrop = 3
-Shop = 1
-SpellDrop = 1
-StackUpgrade = 3
-Story = 1
-WeaponUpgrade = 3
 Others = 3
 
-[RewardCount.Boon]
+[RewardCount.Story]
+Arachne = 3
+Narcissus = 3
+Echo = 3
+Others = 3
+
+[RewardCount.Shop]
+DiscountPercent = 67
 AphroditeUpgrade = 3
 DemeterUpgrade = 3
 HephaestusUpgrade = 3
+SpellDrop = 1
+WeaponUpgradeDrop = 3
+ShopHermesUpgrade = 3
+ShopManaUpgrade = 3
+MaxHealthDrop = 3
+MaxHealthDropBig = 3
+StackUpgrade = 3
+StoreRewardRandomStack = 3
+RoomRewardHealDrop = 3
+HealBigDrop = 3
+ArmorBoost = 3
+MemPointsCommonDrop = 3
+MetaCardPointsCommonDrop = 3
+CardUpgradePointsDrop = 3
+WeaponPointsRareDrop = 3
+Boon = 3
+Consumable = 3
+Others = 3
+
+[RewardCount.Boon]
+HephaestusUpgrade = 3
+AphroditeUpgrade = 3
+DemeterUpgrade = 3
 Others = 3
 ```
 
