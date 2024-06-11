@@ -134,7 +134,7 @@ function patch_SpawnStoreItemInWorld(base, itemData, kitId)
     if Config.Debug then ModUtil.mod.Hades.PrintOverhead(debugMsg, 5) end
 
 	spawnedItem = base(itemData, kitId)
-	thread(SpawnStoreItemCopies, base, reward, rewardCount - 1, itemData, kitId)
+	thread(SpawnStoreItemCopies, base, spawnedItem, shopItemCount - 1, itemData, kitId)
 
 	return spawnedItem
 end
