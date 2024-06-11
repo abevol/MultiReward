@@ -13,9 +13,11 @@ You can also set the reward count for each reward type.
 ## Features
 
 1. Multiple rewards.
-2. Remove MaxGods limits.
+2. Multiple shop items.
+3. Lower shop prices.
+4. Remove MaxGods limits.
     Now with every expedition into the night, you can receive the boons of all gods, not the previous limit of four gods.
-3. Avoid replacing traits.
+5. Avoid replacing traits.
     Now you can have multiple boons of the same slot simultaneously without worrying about the previous ones being replaced.
 
 ## Automatic Installation
@@ -74,11 +76,12 @@ Then you can configure it like this:
 ## Config Example
 
 ```ini
+Debug = false
 Enabled = true
-Debug = true
-RemoveMaxGodsLimits = true
 AvoidReplacingTraits = true
+RemoveMaxGodsLimits = true
 LowerShopPrices = true
+ShopDiscountPercent = 67
 UpgradesOptional = true
 
 [RewardCount]
@@ -113,34 +116,32 @@ Narcissus = 3
 Echo = 3
 Others = 3
 
-[RewardCount.Shop]
-DiscountPercent = 67
-AphroditeUpgrade = 3
-DemeterUpgrade = 3
-HephaestusUpgrade = 3
-SpellDrop = 1
-WeaponUpgradeDrop = 3
-ShopHermesUpgrade = 3
-ShopManaUpgrade = 3
-MaxHealthDrop = 3
-MaxHealthDropBig = 3
-StackUpgrade = 3
-StoreRewardRandomStack = 3
-RoomRewardHealDrop = 3
-HealBigDrop = 3
-ArmorBoost = 3
-MemPointsCommonDrop = 3
-MetaCardPointsCommonDrop = 3
-CardUpgradePointsDrop = 3
-WeaponPointsRareDrop = 3
-Boon = 3
-Consumable = 3
-Others = 3
-
 [RewardCount.Boon]
 HephaestusUpgrade = 3
 AphroditeUpgrade = 3
 DemeterUpgrade = 3
+Others = 3
+
+[ShopItemCount]
+Others = 3
+
+[ShopItemCount.Boon]
+RandomLoot = 3
+Others = 3
+
+[ShopItemCount.Consumable]
+ArmorBoost = 3
+BlindBoxLoot = 3
+MaxHealthDrop = 3
+MaxHealthDropBig = 3
+MaxManaDrop = 3
+HealBigDrop = 3
+RoomRewardHealDrop = 3
+StackUpgrade = 3
+ShopHermesUpgrade = 3
+StoreRewardRandomStack = 3
+CardUpgradePointsDrop = 3
+MetaCardPointsCommonDrop = 3
 Others = 3
 ```
 

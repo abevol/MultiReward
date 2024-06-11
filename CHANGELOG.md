@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2024-06-10
+
+### Added
+
+- Added some config descriptions.
+
+### Fixed
+
+- Fixed errors in calculating reward and shop item quantities.
+
+## [1.1.0] - 2024-06-07
+
+### Added
+
+- Multiple shop items.
+- Lower shop prices.
+
 ## [1.0.8] - 2024-05-26
 
 ### Added
@@ -78,7 +95,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First version of the mod!
 
-[unreleased]: https://github.com/abevol/MultiReward/compare/1.0.8...HEAD
+[unreleased]: https://github.com/abevol/MultiReward/compare/1.1.1...HEAD
+[1.1.1]: https://github.com/abevol/MultiReward/compare/1.1.0...1.1.1
+[1.1.0]: https://github.com/abevol/MultiReward/compare/1.0.8...1.1.0
 [1.0.8]: https://github.com/abevol/MultiReward/compare/1.0.7...1.0.8
 [1.0.7]: https://github.com/abevol/MultiReward/compare/1.0.6...1.0.7
 [1.0.6]: https://github.com/abevol/MultiReward/compare/1.0.5...1.0.6
