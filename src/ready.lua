@@ -19,6 +19,14 @@ ModUtil.mod.Path.Wrap("SpawnStoreItemInWorld", function(base, itemData, kitId)
 	return patch_SpawnStoreItemInWorld(base, itemData, kitId)
 end)
 
+ModUtil.mod.Path.Wrap("UseNPC", function(base, npc, args, user)
+	return patch_UseNPC(base, npc, args, user)
+end)
+
+ModUtil.mod.Path.Wrap("UseLoot", function(base, usee, args, user)
+	return patch_UseLoot(base, usee, args, user)
+end)
+
 ModUtil.mod.Path.Wrap("LeaveRoom", function(base, currentRun, door)
 	return patch_LeaveRoom(base, currentRun, door)
 end)

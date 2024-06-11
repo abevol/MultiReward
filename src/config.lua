@@ -7,13 +7,18 @@ return {
     UpgradesOptional = true,
     RewardCount = {
         -- Set the reward count for each 'RewardType'.
-        Story = 1, -- no effect
         SpellDrop = 1, -- greater than 1 grants more Hex.
         ClockworkGoal = 1, -- when greater than 1, levels will be skipped in the express route.
         TalentDrop = 2, -- keep the setting moderate; too many talent points may prevent closing the talent upgrade interface.
         StackUpgrade = 3, -- this is the Pom rewards count.
         WeaponUpgrade = 3,
         HermesUpgrade = 3,
+        Story = {
+            Arachne = 3,
+            Narcissus = 3,
+            Echo = 3,
+            Others = 3,
+        },
         Shop = {
             DiscountPercent = 67,
             AphroditeUpgrade = 3,

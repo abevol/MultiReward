@@ -185,6 +185,66 @@ function SpawnStoreItemCopies(base, originalReward, rewardCount, itemData, kitId
 	ActiveRewardSpawners = ActiveRewardSpawners - 1
 end
 
+function patch_UseNPC(base, npc, args, user)
+	local rewardCount = 1
+	if Config.RewardCount then
+		if Config.RewardCount.Others then rewardCount = Config.RewardCount.Others end
+		local story = Config.RewardCount.Story
+		if story then
+			if story.Others then rewardCount = story.Others end
+			if story[npc.SpeakerName] then rewardCount = story[npc.SpeakerName] end
+		end
+	end
+
+	base(npc, args, user)
+	if ActiveRewardSpawners == 0 then
+		thread(RefreshNPC, rewardCount - 1, npc)
+	else 
+		notifyExistingWaiters("MultiTrait_NPCUsed")
+	end
+end
+
+function patch_UseLoot(base, usee, args, user)
+	if not usee or not usee.SpeakerName or (usee.SpeakerName ~= "Hades" and usee.SpeakerName ~= "Artemis") then
+		base(usee, args, user)
+		return
+	end
+
+	local rewardCount = 1
+	if Config.RewardCount then
+		if Config.RewardCount.Others then rewardCount = Config.RewardCount.Others end
+		local story = Config.RewardCount.Story
+		if story then
+			if story.Others then rewardCount = story.Others end
+			if story[usee.SpeakerName] then rewardCount = story[usee.SpeakerName] end
+		end
+	end
+
+	base(usee, args, user)
+	if ActiveRewardSpawners == 0 then
+		thread(RefreshNPC, rewardCount - 1, usee)
+	else 
+		notifyExistingWaiters("MultiTrait_NPCUsed")
+	end
+end
+
+function RefreshNPC(amount, npc)
+	ActiveRewardSpawners = ActiveRewardSpawners + 1
+	for _ = 1, amount do
+		npc.NextInteractLines = GetRandomEligibleTextLines( npc, npc.InteractTextLineSets, GetNarrativeDataValue( npc, npc.InteractTextLinePriorities or "InteractTextLinePriorities" ), args )
+		if npc.NextInteractLines ~= nil then
+			if npc.NextInteractLines.Partner ~= nil then
+				CheckPartnerConversations( npc )
+			end
+			SetNextInteractLines( npc, npc.NextInteractLines )
+		end
+		SetAvailableUseText(npc)
+		printMsg("Use Button refresh activated")
+		waitUntil("MultiTrait_NPCUsed")
+	end
+	ActiveRewardSpawners = ActiveRewardSpawners - 1
+end
+
 function patch_LeaveRoom(base, currentRun, door)
 	killTaggedThreads("MultiTrait_RewardSpawner")
 	ActiveRewardSpawners = 0
