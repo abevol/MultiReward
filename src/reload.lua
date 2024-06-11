@@ -76,6 +76,7 @@ function patch_SpawnRoomReward(base, eventSource, args)
     printMsg("%s", debugMsg)
     if Config.Debug then ModUtil.mod.Hades.PrintOverhead(debugMsg, 5) end
 
+	-- First room of run uses this
 	local waitForLast = args.WaitUntilPickup
 	args.WaitUntilPickup = false
 	if Config.UpgradesOptional then
@@ -98,6 +99,7 @@ function SpawnRewardCopies(base, originalReward, rewardCount, eventSource, args)
 	ActiveRewardSpawners = ActiveRewardSpawners + 1
 
 	for i = 1, rewardCount do
+		-- Waiting logic directly copied from functions in the game source code
 		if reward ~= nil then
 			if reward.MenuNotify ~= nil then
 				waitUntil(UIData.BoonMenuId, "MultiTrait_RewardSpawner")
@@ -110,6 +112,7 @@ function SpawnRewardCopies(base, originalReward, rewardCount, eventSource, args)
         reward = base(eventSource, args)
     end
 	
+	-- Wait once more before unlocking the door
 	if reward ~= nil then
 		if reward.MenuNotify ~= nil then
 			waitUntil(UIData.BoonMenuId, "MultiTrait_RewardSpawner")
@@ -130,7 +133,6 @@ function patch_SpawnStoreItemInWorld(base, itemData, kitId)
     printMsg("%s", debugMsg)
     if Config.Debug then ModUtil.mod.Hades.PrintOverhead(debugMsg, 5) end
 
-	
 	spawnedItem = base(itemData, kitId)
 	thread(SpawnStoreItemCopies, base, reward, rewardCount - 1, itemData, kitId)
 
@@ -158,15 +160,8 @@ function SpawnStoreItemCopies(base, originalReward, rewardCount, itemData, kitId
 end
 
 function patch_UseNPC(base, npc, args, user)
-	local rewardCount = 1
-	if Config.RewardCount then
-		if Config.RewardCount.Others then rewardCount = Config.RewardCount.Others end
-		local story = Config.RewardCount.Story
-		if story then
-			if story.Others then rewardCount = story.Others end
-			if story[npc.SpeakerName] then rewardCount = story[npc.SpeakerName] end
-		end
-	end
+	-- I didn't have the time to test this, hope it works
+	local rewardCount = getRewardCount(Config.RewardCount.Story, npc.SpeakerName)
 
 	base(npc, args, user)
 	if ActiveRewardSpawners == 0 then
@@ -176,21 +171,15 @@ function patch_UseNPC(base, npc, args, user)
 	end
 end
 
+-- Currently Hades and Artemis in the Fields use this function for story rewards
 function patch_UseLoot(base, usee, args, user)
 	if not usee or not usee.SpeakerName or (usee.SpeakerName ~= "Hades" and usee.SpeakerName ~= "Artemis") then
 		base(usee, args, user)
 		return
 	end
 
-	local rewardCount = 1
-	if Config.RewardCount then
-		if Config.RewardCount.Others then rewardCount = Config.RewardCount.Others end
-		local story = Config.RewardCount.Story
-		if story then
-			if story.Others then rewardCount = story.Others end
-			if story[usee.SpeakerName] then rewardCount = story[usee.SpeakerName] end
-		end
-	end
+	-- I didn't have the time to test this, hope it works
+	local rewardCount = getRewardCount(Config.RewardCount.Story, usee.SpeakerName)
 
 	base(usee, args, user)
 	if ActiveRewardSpawners == 0 then
@@ -203,6 +192,7 @@ end
 function RefreshNPC(amount, npc)
 	ActiveRewardSpawners = ActiveRewardSpawners + 1
 	for _ = 1, amount do
+		-- For normal NPCs the NextInteractLines have to be set in order for them to be easily refreshable
 		npc.NextInteractLines = GetRandomEligibleTextLines( npc, npc.InteractTextLineSets, GetNarrativeDataValue( npc, npc.InteractTextLinePriorities or "InteractTextLinePriorities" ), args )
 		if npc.NextInteractLines ~= nil then
 			if npc.NextInteractLines.Partner ~= nil then
@@ -212,7 +202,7 @@ function RefreshNPC(amount, npc)
 		end
 		SetAvailableUseText(npc)
 		printMsg("Use Button refresh activated")
-		waitUntil("MultiTrait_NPCUsed")
+		waitUntil("MultiTrait_NPCUsed", "MultiTrait_RewardSpawner")
 	end
 	ActiveRewardSpawners = ActiveRewardSpawners - 1
 end
