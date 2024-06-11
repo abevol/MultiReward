@@ -4,6 +4,7 @@ return {
     RemoveMaxGodsLimits = true,
     AvoidReplacingTraits = true,
     LowerShopPrices = true,
+    UpgradesOptional = true,
     RewardCount = {
         -- Set the reward count for each 'RewardType'.
         Story = 1, -- no effect
@@ -18,16 +19,21 @@ return {
             AphroditeUpgrade = 3,
             DemeterUpgrade = 3,
             HephaestusUpgrade = 3,
+            SpellDrop = 1,
             WeaponUpgradeDrop = 3,
             ShopHermesUpgrade = 3,
             ShopManaUpgrade = 3,
+            MaxHealthDrop = 3,
             MaxHealthDropBig = 3,
             StackUpgrade = 3,
             StoreRewardRandomStack = 3,
-            RoomRewardHealDrop = 2,
-            HealBigDrop = 2,
+            RoomRewardHealDrop = 3,
+            HealBigDrop = 3,
             ArmorBoost = 3,
-            WeaponPointsRareDrop = 1,
+            MemPointsCommonDrop = 3,
+            MetaCardPointsCommonDrop = 3,
+            CardUpgradePointsDrop = 3,
+            WeaponPointsRareDrop = 3,
             Boon = 3,
             Consumable = 3,
             Others = 3

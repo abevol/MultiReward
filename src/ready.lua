@@ -19,6 +19,22 @@ ModUtil.mod.Path.Wrap("SpawnStoreItemInWorld", function(base, itemData, kitId)
 	return patch_SpawnStoreItemInWorld(base, itemData, kitId)
 end)
 
+ModUtil.mod.Path.Wrap("LeaveRoom", function(base, currentRun, door)
+	return patch_LeaveRoom(base, currentRun, door)
+end)
+
+ModUtil.mod.Path.Wrap("CreateLoot", function(base, args)
+	return patch_CreateLoot(base, args)
+end)
+
+ModUtil.mod.Path.Wrap("CreateConsumableItem", function(base, consumableId, consumableName, costOverride, args)
+	return patch_CreateConsumableItem(base, consumableId, consumableName, costOverride, args)
+end)
+
+ModUtil.mod.Path.Wrap("CheckRoomExitsReady", function(base, currentRoom)
+	return patch_CheckRoomExitsReady(base, currentRoom)
+end)
+
 ModUtil.mod.Path.Wrap("ReachedMaxGods", function(base, excludedGods)
 	return patch_ReachedMaxGods(base, excludedGods)
 end)
