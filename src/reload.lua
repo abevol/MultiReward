@@ -59,6 +59,7 @@ function patch_StartNewRun(base, prevRun, args)
 
 		printMsg("Added shop price reduction by %s%%", tostring(storeCostMultiplier * 100))
 	end
+
 	return currentRun
 end
 
@@ -75,10 +76,53 @@ function patch_SpawnRoomReward(base, eventSource, args)
     printMsg("%s", debugMsg)
     if Config.Debug then ModUtil.mod.Hades.PrintOverhead(debugMsg, 5) end
 
-    for _ = 1,  rewardCount do
+	-- First room of run uses this
+	local waitForLast = args.WaitUntilPickup
+	args.WaitUntilPickup = false
+	if Config.UpgradesOptional then
+		args.NotRequiredPickup = true
+	end
+
+	reward = base(eventSource, args)
+	thread(SpawnRewardCopies, base, reward, rewardCount - 1, eventSource, args)
+
+	if waitForLast then
+		waitUntil("MultiTrait_AllRewardsAcquired")
+	end
+    return reward
+end
+
+-- Does the reward spawning in another thread to allow the player to leave the room before picking up all rewards while still spawning the rewards one at a time
+function SpawnRewardCopies(base, originalReward, rewardCount, eventSource, args)
+    local reward = originalReward
+	args.WaitUntilPickup = false
+	ActiveRewardSpawners = ActiveRewardSpawners + 1
+
+	for i = 1, rewardCount do
+		-- Waiting logic directly copied from functions in the game source code
+		if reward ~= nil then
+			if reward.MenuNotify ~= nil then
+				waitUntil(UIData.BoonMenuId, "MultiTrait_RewardSpawner")
+			else
+				reward.NotifyName = "OnUsed"..reward.ObjectId
+				waitUntil(reward.NotifyName, "MultiTrait_RewardSpawner")
+			end
+		end
+
         reward = base(eventSource, args)
     end
-    return reward
+	
+	-- Wait once more before unlocking the door
+	if reward ~= nil then
+		if reward.MenuNotify ~= nil then
+			waitUntil(UIData.BoonMenuId, "MultiTrait_RewardSpawner")
+		else
+			reward.NotifyName = "OnUsed"..reward.ObjectId
+			waitUntil(reward.NotifyName, "MultiTrait_RewardSpawner")
+		end
+	end
+	notifyExistingWaiters("MultiTrait_AllRewardsAcquired")
+	ActiveRewardSpawners = ActiveRewardSpawners - 1
 end
 
 function patch_SpawnStoreItemInWorld(base, itemData, kitId)
@@ -89,10 +133,119 @@ function patch_SpawnStoreItemInWorld(base, itemData, kitId)
     printMsg("%s", debugMsg)
     if Config.Debug then ModUtil.mod.Hades.PrintOverhead(debugMsg, 5) end
 
-	for _ = 1, shopItemCount do
-		spawnedItem = base(itemData, kitId)
-	end
+	spawnedItem = base(itemData, kitId)
+	thread(SpawnStoreItemCopies, base, spawnedItem, shopItemCount - 1, itemData, kitId)
+
 	return spawnedItem
+end
+
+-- Does the store item spawning in another thread to spawn the rewards one at a time for a better visual experience
+function SpawnStoreItemCopies(base, originalReward, rewardCount, itemData, kitId)
+    local reward = originalReward
+	ActiveRewardSpawners = ActiveRewardSpawners + 1
+
+	for i = 1, rewardCount do
+		if reward ~= nil then
+			if reward.MenuNotify ~= nil then
+				waitUntil(UIData.BoonMenuId, "MultiTrait_RewardSpawner")
+			else
+				reward.NotifyName = "OnUsed"..reward.ObjectId
+				waitUntil(reward.NotifyName, "MultiTrait_RewardSpawner")
+			end
+		end
+
+        reward = base(itemData, kitId)
+    end
+	ActiveRewardSpawners = ActiveRewardSpawners - 1
+end
+
+function patch_UseNPC(base, npc, args, user)
+	-- I didn't have the time to test this, hope it works
+	local rewardCount = getRewardCount(Config.RewardCount.Story, npc.SpeakerName)
+
+	base(npc, args, user)
+	if ActiveRewardSpawners == 0 then
+		thread(RefreshNPC, rewardCount - 1, npc)
+	else 
+		notifyExistingWaiters("MultiTrait_NPCUsed")
+	end
+end
+
+-- Currently Hades and Artemis in the Fields use this function for story rewards
+function patch_UseLoot(base, usee, args, user)
+	if not usee or not usee.SpeakerName or (usee.SpeakerName ~= "Hades" and usee.SpeakerName ~= "Artemis") then
+		base(usee, args, user)
+		return
+	end
+
+	-- I didn't have the time to test this, hope it works
+	local rewardCount = getRewardCount(Config.RewardCount.Story, usee.SpeakerName)
+
+	base(usee, args, user)
+	if ActiveRewardSpawners == 0 then
+		thread(RefreshNPC, rewardCount - 1, usee)
+	else 
+		notifyExistingWaiters("MultiTrait_NPCUsed")
+	end
+end
+
+function RefreshNPC(amount, npc)
+	ActiveRewardSpawners = ActiveRewardSpawners + 1
+	for _ = 1, amount do
+		-- For normal NPCs the NextInteractLines have to be set in order for them to be easily refreshable
+		npc.NextInteractLines = GetRandomEligibleTextLines( npc, npc.InteractTextLineSets, GetNarrativeDataValue( npc, npc.InteractTextLinePriorities or "InteractTextLinePriorities" ), args )
+		if npc.NextInteractLines ~= nil then
+			if npc.NextInteractLines.Partner ~= nil then
+				CheckPartnerConversations( npc )
+			end
+			SetNextInteractLines( npc, npc.NextInteractLines )
+		end
+		SetAvailableUseText(npc)
+		printMsg("Use Button refresh activated")
+		waitUntil("MultiTrait_NPCUsed", "MultiTrait_RewardSpawner")
+	end
+	ActiveRewardSpawners = ActiveRewardSpawners - 1
+end
+
+function patch_LeaveRoom(base, currentRun, door)
+	killTaggedThreads("MultiTrait_RewardSpawner")
+	ActiveRewardSpawners = 0
+	base(currentRun, door)
+end
+
+function patch_CreateLoot(base, args)
+	if Config.UpgradesOptional then
+		args.DoesNotBlockExit = true
+	end
+	if ActiveRewardSpawners > 0 then
+		args.SuppressSpawnSounds = true
+	end
+
+	local reward = base(args)
+	
+	-- Make reward accessible for the bow indicators in the fields of mourning
+	if Config.UpgradesOptional then
+		if CurrentRun.CurrentRoom.Using and CurrentRun.CurrentRoom.Using.Spawn and CurrentRun.CurrentRoom.Using.Spawn == "FieldsRewardCage" then
+			MapState.OptionalRewards[reward.ObjectId] = reward
+		end
+	end
+
+	return reward
+end
+
+function patch_CreateConsumableItem(base, consumableId, consumableName, costOverride, args) 
+	args = args or {}
+	if ActiveRewardSpawners > 0 then
+		args.IgnoreSounds = true
+	end
+	return base(consumableId, consumableName, costOverride, args)
+end
+
+function patch_CheckRoomExitsReady(base, currentRoom)
+	if not Config.UpgradesOptional and ActiveRewardSpawners > 0 then
+		return false
+	end
+	return base(currentRoom)
 end
 
 function patch_ReachedMaxGods(base, excludedGods)

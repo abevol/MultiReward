@@ -37,6 +37,8 @@ Config = Chalk.auto 'config.lua'
 -- ^ this updates our `.cfg` file in the config folder!
 public.config = Config -- so other mods can access our config
 
+ActiveRewardSpawners = 0
+
 function printMsg(fmt, ...)
     local text = string.format(fmt, ...)
     local green = "\x1b[32m"

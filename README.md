@@ -82,27 +82,66 @@ AvoidReplacingTraits = true
 RemoveMaxGodsLimits = true
 LowerShopPrices = true
 ShopDiscountPercent = 67
+UpgradesOptional = true
 
 [RewardCount]
+SpellDrop = 1
+ClockworkGoal = 1
+TalentDrop = 2
+StackUpgrade = 3
+WeaponUpgrade = 3
 HermesUpgrade = 3
-MaxHealthDrop = 3
-MaxManaDrop = 3
-MemPointsCommonDrop = 3
+GiftDrop = 3
 MetaCurrencyDrop = 3
+MemPointsCommonDrop = 3
+MetaCardPointsCommonDrop = 3
+MetaCardPointsCommonBigDrop = 3
+RoomMoneyDrop = 3
+RoomMoneyTinyDrop = 3
+MaxHealthDrop = 3
+MaxHealthDropSmall = 3
+MaxManaDrop = 3
+MaxManaDropSmall = 3
+MixerFBossDrop = 3
+MixerGBossDrop = 3
+MixerHBossDrop = 3
+MixerIBossDrop = 3
 MixerNBossDrop = 3
 MixerOBossDrop = 3
-RoomMoneyDrop = 3
-Shop = 1
-SpellDrop = 1
-StackUpgrade = 3
-Story = 1
-WeaponUpgrade = 3
+Others = 3
+
+[RewardCount.Story]
+Arachne = 3
+Narcissus = 3
+Echo = 3
 Others = 3
 
 [RewardCount.Boon]
+HephaestusUpgrade = 3
 AphroditeUpgrade = 3
 DemeterUpgrade = 3
-HephaestusUpgrade = 3
+Others = 3
+
+[ShopItemCount]
+Others = 3
+
+[ShopItemCount.Boon]
+RandomLoot = 3
+Others = 3
+
+[ShopItemCount.Consumable]
+ArmorBoost = 3
+BlindBoxLoot = 3
+MaxHealthDrop = 3
+MaxHealthDropBig = 3
+MaxManaDrop = 3
+HealBigDrop = 3
+RoomRewardHealDrop = 3
+StackUpgrade = 3
+ShopHermesUpgrade = 3
+StoreRewardRandomStack = 3
+CardUpgradePointsDrop = 3
+MetaCardPointsCommonDrop = 3
 Others = 3
 ```
 

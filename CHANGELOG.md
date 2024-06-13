@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Multiple story rewards
+- Making rewards optional
+
+### Fixed
+
+- Reward spawning issues
+
 ## [1.1.1] - 2024-06-10
 
 ### Added
