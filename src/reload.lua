@@ -238,7 +238,17 @@ function patch_CreateConsumableItem(base, consumableId, consumableName, costOver
 	if ActiveRewardSpawners > 0 then
 		args.IgnoreSounds = true
 	end
-	return base(consumableId, consumableName, costOverride, args)
+
+	local consumable = base(consumableId, consumableName, costOverride, args)
+
+	-- Make reward accessible for the bow indicators in the fields of mourning
+	if Config.UpgradesOptional then
+		if CurrentRun.CurrentRoom.Using and CurrentRun.CurrentRoom.Using.Spawn and CurrentRun.CurrentRoom.Using.Spawn == "FieldsRewardCage" then
+			MapState.OptionalRewards[consumable.ObjectId] = consumable
+		end
+	end
+
+	return consumable
 end
 
 function patch_CheckRoomExitsReady(base, currentRoom)
