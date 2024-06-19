@@ -201,6 +201,8 @@ function RefreshNPC(amount, npc)
 			SetNextInteractLines( npc, npc.NextInteractLines )
 		end
 		SetAvailableUseText(npc)
+		-- Refill upgrade options
+		npc.UpgradeOptions = nil
 		printMsg("Use Button refresh activated")
 		waitUntil("MultiTrait_NPCUsed", "MultiTrait_RewardSpawner")
 	end
