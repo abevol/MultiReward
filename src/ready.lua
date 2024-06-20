@@ -27,6 +27,10 @@ ModUtil.mod.Path.Wrap("UseLoot", function(base, usee, args, user)
 	return patch_UseLoot(base, usee, args, user)
 end)
 
+ModUtil.mod.Path.Wrap("SetTraitTextData", function(base, traitData, args)
+	return patch_SetTraitTextData(base, traitData, args)
+end)
+
 ModUtil.mod.Path.Wrap("LeaveRoom", function(base, currentRun, door)
 	return patch_LeaveRoom(base, currentRun, door)
 end)
