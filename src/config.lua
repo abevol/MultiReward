@@ -4,8 +4,9 @@ local config = {
     RemoveMaxGodsLimits = true,
     AvoidReplacingTraits = true,
     LowerShopPrices = true,
-    UpgradesOptional = true,
     ShopDiscountPercent = 67,
+    UpgradesOptional = true,
+    CagesOptional = false,
     RewardCount = {
         Shop = 1,
         SpellDrop = 1,
@@ -21,6 +22,7 @@ local config = {
             Others = 3
         },
         Story = {
+            Eris = 1,
             Arachne = 2,
             Narcissus = 2,
             Echo = 2,
@@ -77,26 +79,34 @@ local description = {
     AvoidReplacingTraits = "Now you can have multiple boons of the same slot simultaneously without worrying about the previous ones being replaced.\n现在你可以同时拥有多个相同槽位的恩惠，而不用担心之前的恩惠会被替换掉。",
     LowerShopPrices = "Reduce the price of items in the shop.\n使商店物品的价格降低。",
     ShopDiscountPercent = "Shop discount percentage.\n商店折扣百分比。",
+    UpgradesOptional = "Makes it possible to leave a room without picking up rewards (avoid unwanted boons).",
+    CagesOptional = "When UpgradesOptional is active, makes the interaction with cages optional to avoid cage encounters in the fields completely.",
     RewardCount = {
         -- Set the reward count for each 'RewardType'.
-        Story = "No effect\n无效",
         Shop = "No effect. Please use the configuration items in 'ShopItemCount' to change the count of items in the shop.\n无效，请使用 ShopItemCount 中的配置项来修改商店物品的数量。",
         SpellDrop = "Greater than 1 grants more Hex.\n大于1时将获得更多咒术。",
         ClockworkGoal = "When greater than 1, levels will be skipped in the express route.\n当大于1时，将在快速通道中跳过若干关卡。",
         TalentDrop = "Keep the setting moderate; too many talent points may prevent closing the talent upgrade interface.\n保持设置适中；太多的天赋点数可能会导致天赋升级界面无法关闭。",
         StackUpgrade = "This is the Pom rewards count.\n这是力量石榴的奖励数量。",
-        WeaponUpgrade = "",
-        HermesUpgrade = "",
+        WeaponUpgrade = "This is the Hammer rewards count.",
+        HermesUpgrade = "This is the Hermes boon count.",
         Boon = {
             -- These subkeys are 'LootName'.
-            HephaestusUpgrade = "",
-            AphroditeUpgrade = "",
-            DemeterUpgrade = "",
-            Others = ""
+            HephaestusUpgrade = "This is the Hephaestus boon count.",
+            AphroditeUpgrade = "This is the Aphrodite boon count.",
+            DemeterUpgrade = "This is the Demeter boon count.",
+            Others = "This is the default boon count."
+        },
+        Story = {
+            Eris = "Gives you multiple Eris curses in early runs.",
+            Arachne = "Number of dresses from Arachne.",
+            Narcissus = "Number of rewards from Narcissus.",
+            Echo = "Number of rewards from Echo.",
+            Others = "Default number of story rewards.",
         },
         Devotion = "",
-        GiftDrop = "",
-        MetaCurrencyDrop = "",
+        GiftDrop = "This is the nectar reward count.",
+        MetaCurrencyDrop = "This is the bones reward count.",
         MemPointsCommonDrop = "This is the psyche reward count.",
         MetaCardPointsCommonDrop = "This is the ashes reward count.",
         MetaCardPointsCommonBigDrop = "",
@@ -116,8 +126,8 @@ local description = {
     },
     ShopItemCount = {
         Boon = {
-            RandomLoot = "",
-            Others = ""
+            RandomLoot = "This is the amount of boons from an unknown god in one shop slot.",
+            Others = "This is the default amount of boons in one shop slot."
         },
         Consumable = {
             ArmorBoost = "",
@@ -125,16 +135,16 @@ local description = {
             MaxHealthDrop = "",
             MaxHealthDropBig = "",
             MaxManaDrop = "",
-            HealBigDrop = "",
+            HealBigDrop = "This is the amount of food in the Tartarus shop.",
             RoomRewardHealDrop = "",
             StackUpgrade = "",
             ShopHermesUpgrade = "",
-            StoreRewardRandomStack = "",
-            CardUpgradePointsDrop = "",
+            StoreRewardRandomStack = "This is the amount of sliced poms (random target).",
+            CardUpgradePointsDrop = "This is the amount of Moondust in one shop slot.",
             MetaCardPointsCommonDrop = "",
             Others = ""
         },
-        Others = ""
+        Others = "This is the default amount of items per shop slot."
     }
 }
 

@@ -38,7 +38,7 @@ end
 function patch_StartNewRun(base, prevRun, args)
 	local currentRun = base(prevRun, args)
 
-	if GameState ~= nil and CurrentRun.Hero ~= nil and Config.LowerShopPrices then
+	if GameState ~= nil and Game.CurrentRun.Hero ~= nil and Config.LowerShopPrices then
 		local storeCostMultiplier = 1 / Config.ShopItemCount.Others
 		local discountConfig = Config.ShopDiscountPercent
 		if discountConfig and discountConfig >= 0 and discountConfig <= 100 then
@@ -55,7 +55,7 @@ function patch_StartNewRun(base, prevRun, args)
 			}
 		})
 		ProcessDataInheritance(TraitData.MultiTraitCostReduction, TraitData)
-		AddTrait(CurrentRun.Hero, "MultiTraitCostReduction", "Common")
+		AddTrait(Game.CurrentRun.Hero, "MultiTraitCostReduction", "Common")
 
 		printMsg("Added shop price reduction by %s%%", tostring(storeCostMultiplier * 100))
 	end
@@ -160,7 +160,12 @@ function SpawnStoreItemCopies(base, originalReward, rewardCount, itemData, kitId
 end
 
 function patch_UseNPC(base, npc, args, user)
-	-- I didn't have the time to test this, hope it works
+	local NPCsWithRewards = { Arachne = true, Narcissus = true, Echo = true, Medea = true, Icarus = true, Circe = true, Eris = true } --Nemesis, Artemis and Hades are special cases (see patch_UseLoot)
+	if not NPCsWithRewards[npc.SpeakerName] then
+		base(npc, args, user)
+		return
+	end
+
 	local rewardCount = getRewardCount(Config.RewardCount.Story, npc.SpeakerName)
 
 	base(npc, args, user)
@@ -178,7 +183,6 @@ function patch_UseLoot(base, usee, args, user)
 		return
 	end
 
-	-- I didn't have the time to test this, hope it works
 	local rewardCount = getRewardCount(Config.RewardCount.Story, usee.SpeakerName)
 
 	base(usee, args, user)
@@ -201,14 +205,67 @@ function RefreshNPC(amount, npc)
 			SetNextInteractLines( npc, npc.NextInteractLines )
 		end
 		SetAvailableUseText(npc)
-		printMsg("Use Button refresh activated")
+		-- Refill upgrade options
+		npc.UpgradeOptions = nil
+		printMsg("NPC refreshed")
 		waitUntil("MultiTrait_NPCUsed", "MultiTrait_RewardSpawner")
 	end
 	ActiveRewardSpawners = ActiveRewardSpawners - 1
+	notifyExistingWaiters("MultiTrait_AllNPCRewardsAcquired")
+end
+
+function patch_ErisTakeOff(base, eris)
+	if ActiveRewardSpawners > 0 or getRewardCount(Config.RewardCount.Story, "Eris") > 1 then
+		waitUntil("MultiTrait_AllNPCRewardsAcquired", "MultiTrait_NPCHandler")
+	end
+	base(eris)
+end
+
+function patch_ArtemisExitPresentation(base, source, args)
+	if ActiveRewardSpawners == 0 and getRewardCount(Config.RewardCount.Story, "Artemis") < 2 then
+		base(source, args)
+		return
+	end
+	thread(ArtemisThreadedExit, base, source, args)
+end
+
+function ArtemisThreadedExit(base, source, args)
+	waitUntil("MultiTrait_AllNPCRewardsAcquired", "MultiTrait_NPCHandler")
+	base(source, args)
+end
+
+function patch_SetTraitTextData(base, traitData, args)
+	if HeroHasTrait(traitData.Name) and (traitData.OldLevel == nil or traitData.NewLevel == nil) then
+		traitData.OldLevel = GetTraitCount(Game.CurrentRun.Hero, { TraitData = traitData })
+		traitData.NewLevel = traitData.OldLevel + 1
+		printMsg("Patched level indicators for story reward")
+	end
+	base(traitData, args)
+end
+
+function patch_SpawnRewardCages(base, room, args)
+	if room.CageRewards ~= nil then
+		ActiveCages = #room.CageRewards
+	end
+	base(room, args)
+	if CheckRoomExitsReady( room ) then
+		room.ExitsUnlocked = true -- At this point exits ar not initialized, that's why we can just use DoUnlockRoomExits
+		DoUnlockRoomExits( Game.CurrentRun, room )
+	end
+end
+
+function patch_StartFieldsEncounter(base, rewardCage, args)
+	base(rewardCage, args)
+	ActiveCages = ActiveCages - 1
+	if CheckRoomExitsReady(Game.CurrentRun.CurrentRoom) then
+		UnlockRoomExits(Game.CurrentRun, Game.CurrentRun.CurrentRoom)
+	end
 end
 
 function patch_LeaveRoom(base, currentRun, door)
 	killTaggedThreads("MultiTrait_RewardSpawner")
+	killTaggedThreads("MultiTrait_NPCHandler")
+	ActiveCages = 0
 	ActiveRewardSpawners = 0
 	base(currentRun, door)
 end
@@ -225,7 +282,7 @@ function patch_CreateLoot(base, args)
 	
 	-- Make reward accessible for the bow indicators in the fields of mourning
 	if Config.UpgradesOptional then
-		if CurrentRun.CurrentRoom.Using and CurrentRun.CurrentRoom.Using.Spawn and CurrentRun.CurrentRoom.Using.Spawn == "FieldsRewardCage" then
+		if Game.CurrentRun.CurrentRoom.Using and Game.CurrentRun.CurrentRoom.Using.Spawn and Game.CurrentRun.CurrentRoom.Using.Spawn == "FieldsRewardCage" then
 			MapState.OptionalRewards[reward.ObjectId] = reward
 		end
 	end
@@ -238,10 +295,23 @@ function patch_CreateConsumableItem(base, consumableId, consumableName, costOver
 	if ActiveRewardSpawners > 0 then
 		args.IgnoreSounds = true
 	end
-	return base(consumableId, consumableName, costOverride, args)
+
+	local consumable = base(consumableId, consumableName, costOverride, args)
+
+	-- Make reward accessible for the bow indicators in the fields of mourning
+	if Config.UpgradesOptional then
+		if Game.CurrentRun.CurrentRoom.Using and Game.CurrentRun.CurrentRoom.Using.Spawn and Game.CurrentRun.CurrentRoom.Using.Spawn == "FieldsRewardCage" then
+			MapState.OptionalRewards[consumable.ObjectId] = consumable
+		end
+	end
+
+	return consumable
 end
 
 function patch_CheckRoomExitsReady(base, currentRoom)
+	if not Config.CagesOptional and ActiveCages > 0 then
+		return false
+	end
 	if not Config.UpgradesOptional and ActiveRewardSpawners > 0 then
 		return false
 	end

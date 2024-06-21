@@ -27,6 +27,26 @@ ModUtil.mod.Path.Wrap("UseLoot", function(base, usee, args, user)
 	return patch_UseLoot(base, usee, args, user)
 end)
 
+ModUtil.mod.Path.Wrap("ErisTakeOff", function(base, eris)
+	return patch_ErisTakeOff(base, eris)
+end)
+
+ModUtil.mod.Path.Wrap("ArtemisExitPresentation", function(base, source, args)
+	return patch_ArtemisExitPresentation(base, source, args)
+end)
+
+ModUtil.mod.Path.Wrap("SetTraitTextData", function(base, traitData, args)
+	return patch_SetTraitTextData(base, traitData, args)
+end)
+
+ModUtil.mod.Path.Wrap("SpawnRewardCages", function(base, room, args)
+	return patch_SpawnRewardCages(base, room, args)
+end)
+
+ModUtil.mod.Path.Wrap("StartFieldsEncounter", function(base, rewardCage, args)
+	return patch_StartFieldsEncounter(base, rewardCage, args)
+end)
+
 ModUtil.mod.Path.Wrap("LeaveRoom", function(base, currentRun, door)
 	return patch_LeaveRoom(base, currentRun, door)
 end)
