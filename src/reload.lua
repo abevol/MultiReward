@@ -211,11 +211,21 @@ end
 
 function patch_SetTraitTextData(base, traitData, args)
 	if HeroHasTrait(traitData.Name) and (traitData.OldLevel == nil or traitData.NewLevel == nil) then
-		printMsg("Patched level indicators for story reward")
 		traitData.OldLevel = GetTraitCount(CurrentRun.Hero, { TraitData = traitData })
 		traitData.NewLevel = traitData.OldLevel + 1
+		printMsg("Patched level indicators for story reward")
 	end
 	base(traitData, args)
+end
+
+function patch_SpawnRewardCages(base, room, args)
+	base(room, args)
+	printMsg("Unlock check")
+	if CheckRoomExitsReady( room ) then
+		printMsg("Got here")
+		room.ExitsUnlocked = true
+		DoUnlockRoomExits( CurrentRun, room )
+	end
 end
 
 function patch_LeaveRoom(base, currentRun, door)

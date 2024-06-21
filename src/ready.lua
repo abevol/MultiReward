@@ -31,6 +31,10 @@ ModUtil.mod.Path.Wrap("SetTraitTextData", function(base, traitData, args)
 	return patch_SetTraitTextData(base, traitData, args)
 end)
 
+ModUtil.mod.Path.Wrap("SpawnRewardCages", function(base, room, args)
+	return patch_SpawnRewardCages(base, room, args)
+end)
+
 ModUtil.mod.Path.Wrap("LeaveRoom", function(base, currentRun, door)
 	return patch_LeaveRoom(base, currentRun, door)
 end)
