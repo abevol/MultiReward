@@ -160,7 +160,7 @@ function SpawnStoreItemCopies(base, originalReward, rewardCount, itemData, kitId
 end
 
 function patch_UseNPC(base, npc, args, user)
-	local NPCsWithRewards = { "Arachne", "Narcissus", "Echo", "Medea", "Icarus", "Circe" } --Nemesis, Artemis and Hades are special cases (see patch_UseLoot)
+	local NPCsWithRewards = { "Arachne", "Narcissus", "Echo", "Medea", "Icarus", "Circe", "Eris" } --Nemesis, Artemis and Hades are special cases (see patch_UseLoot)
 	if not NPCsWithRewards[npc.SpeakerName] then
 		base(npc, args, user)
 		return
@@ -244,17 +244,28 @@ function patch_SetTraitTextData(base, traitData, args)
 end
 
 function patch_SpawnRewardCages(base, room, args)
+	if room.CageRewards ~= nil then
+		ActiveCages = #room.CageRewards
+	end
 	base(room, args)
-	printMsg("Unlock check")
 	if CheckRoomExitsReady( room ) then
-		printMsg("Got here")
-		room.ExitsUnlocked = true
+		room.ExitsUnlocked = true -- At this point exits ar not initialized, that's why we can just use DoUnlockRoomExits
 		DoUnlockRoomExits( CurrentRun, room )
+	end
+end
+
+function patch_StartFieldsEncounter(base, rewardCage, args)
+	base(rewardCage, args)
+	ActiveCages = ActiveCages - 1
+	if CheckRoomExitsReady(CurrentRun.CurrentRoom) then
+		UnlockRoomExits(CurrentRun, CurrentRun.CurrentRoom)
 	end
 end
 
 function patch_LeaveRoom(base, currentRun, door)
 	killTaggedThreads("MultiTrait_RewardSpawner")
+	killTaggedThreads("MultiTrait_NPCHandler")
+	ActiveCages = 0
 	ActiveRewardSpawners = 0
 	base(currentRun, door)
 end
@@ -298,6 +309,9 @@ function patch_CreateConsumableItem(base, consumableId, consumableName, costOver
 end
 
 function patch_CheckRoomExitsReady(base, currentRoom)
+	if not Config.CagesOptional and ActiveCages > 0 then
+		return false
+	end
 	if not Config.UpgradesOptional and ActiveRewardSpawners > 0 then
 		return false
 	end

@@ -5,6 +5,7 @@ local config = {
     AvoidReplacingTraits = true,
     LowerShopPrices = true,
     UpgradesOptional = true,
+    CagesOptional = false,
     ShopDiscountPercent = 67,
     RewardCount = {
         Shop = 1,
@@ -21,6 +22,7 @@ local config = {
             Others = 3
         },
         Story = {
+            Eris = 1,
             Arachne = 2,
             Narcissus = 2,
             Echo = 2,

@@ -43,6 +43,10 @@ ModUtil.mod.Path.Wrap("SpawnRewardCages", function(base, room, args)
 	return patch_SpawnRewardCages(base, room, args)
 end)
 
+ModUtil.mod.Path.Wrap("StartFieldsEncounter", function(base, rewardCage, args)
+	return patch_StartFieldsEncounter(base, rewardCage, args)
+end)
+
 ModUtil.mod.Path.Wrap("LeaveRoom", function(base, currentRun, door)
 	return patch_LeaveRoom(base, currentRun, door)
 end)
