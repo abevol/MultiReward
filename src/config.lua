@@ -83,7 +83,6 @@ local description = {
     CagesOptional = "When UpgradesOptional is active, makes the interaction with cages optional to avoid cage encounters in the fields completely.",
     RewardCount = {
         -- Set the reward count for each 'RewardType'.
-        Story = "No effect\n无效",
         Shop = "No effect. Please use the configuration items in 'ShopItemCount' to change the count of items in the shop.\n无效，请使用 ShopItemCount 中的配置项来修改商店物品的数量。",
         SpellDrop = "Greater than 1 grants more Hex.\n大于1时将获得更多咒术。",
         ClockworkGoal = "When greater than 1, levels will be skipped in the express route.\n当大于1时，将在快速通道中跳过若干关卡。",
@@ -97,6 +96,13 @@ local description = {
             AphroditeUpgrade = "This is the Aphrodite boon count.",
             DemeterUpgrade = "This is the Demeter boon count.",
             Others = "This is the default boon count."
+        },
+        Story = {
+            Eris = "Gives you multiple Eris curses in early runs.",
+            Arachne = "Number of dresses from Arachne.",
+            Narcissus = "Number of rewards from Narcissus.",
+            Echo = "Number of rewards from Echo.",
+            Others = "Default number of story rewards.",
         },
         Devotion = "",
         GiftDrop = "This is the nectar reward count.",
