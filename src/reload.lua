@@ -160,7 +160,7 @@ function SpawnStoreItemCopies(base, originalReward, rewardCount, itemData, kitId
 end
 
 function patch_UseNPC(base, npc, args, user)
-	local NPCsWithRewards = { "Arachne", "Narcissus", "Echo", "Medea", "Icarus", "Circe", "Eris" } --Nemesis, Artemis and Hades are special cases (see patch_UseLoot)
+	local NPCsWithRewards = { Arachne = true, Narcissus = true, Echo = true, Medea = true, Icarus = true, Circe = true, Eris = true } --Nemesis, Artemis and Hades are special cases (see patch_UseLoot)
 	if not NPCsWithRewards[npc.SpeakerName] then
 		base(npc, args, user)
 		return
