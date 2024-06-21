@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Multiple story rewards
 - Making rewards optional
+- Making cages optional when rewards are optional
 
 ### Fixed
 
