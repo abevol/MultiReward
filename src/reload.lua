@@ -160,7 +160,12 @@ function SpawnStoreItemCopies(base, originalReward, rewardCount, itemData, kitId
 end
 
 function patch_UseNPC(base, npc, args, user)
-	-- I didn't have the time to test this, hope it works
+	local NPCsWithRewards = { "Arachne", "Narcissus", "Echo", "Medea", "Icarus", "Circe" } --Nemesis, Artemis and Hades are special cases (see patch_UseLoot)
+	if not NPCsWithRewards[npc.SpeakerName] then
+		base(npc, args, user)
+		return
+	end
+
 	local rewardCount = getRewardCount(Config.RewardCount.Story, npc.SpeakerName)
 
 	base(npc, args, user)
@@ -178,7 +183,6 @@ function patch_UseLoot(base, usee, args, user)
 		return
 	end
 
-	-- I didn't have the time to test this, hope it works
 	local rewardCount = getRewardCount(Config.RewardCount.Story, usee.SpeakerName)
 
 	base(usee, args, user)
@@ -203,10 +207,31 @@ function RefreshNPC(amount, npc)
 		SetAvailableUseText(npc)
 		-- Refill upgrade options
 		npc.UpgradeOptions = nil
-		printMsg("Use Button refresh activated")
+		printMsg("NPC refreshed")
 		waitUntil("MultiTrait_NPCUsed", "MultiTrait_RewardSpawner")
 	end
 	ActiveRewardSpawners = ActiveRewardSpawners - 1
+	notifyExistingWaiters("MultiTrait_AllNPCRewardsAcquired")
+end
+
+function patch_ErisTakeOff(base, eris)
+	if ActiveRewardSpawners > 0 or getRewardCount(Config.RewardCount.Story, "Eris") > 1 then
+		waitUntil("MultiTrait_AllNPCRewardsAcquired", "MultiTrait_NPCHandler")
+	end
+	base(eris)
+end
+
+function patch_ArtemisExitPresentation(base, source, args)
+	if ActiveRewardSpawners == 0 and getRewardCount(Config.RewardCount.Story, "Artemis") < 2 then
+		base(source, args)
+		return
+	end
+	thread(ArtemisThreadedExit, base, source, args)
+end
+
+function ArtemisThreadedExit(base, source, args)
+	waitUntil("MultiTrait_AllNPCRewardsAcquired", "MultiTrait_NPCHandler")
+	base(source, args)
 end
 
 function patch_SetTraitTextData(base, traitData, args)
