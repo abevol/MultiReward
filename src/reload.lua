@@ -35,11 +35,22 @@ local function getRewardCount(config, rewardType, lootName)
     return v
 end
 
+local function getSignalName(signalName, objectId)
+	local prefixedSignalName = SignalPrefix.."_"..signalName
+	if objectId then
+		prefixedSignalName = prefixedSignalName.."_"..objectId
+	end
+	return prefixedSignalName
+end
+
+local function getTagName(tagName, objectId)
+	return getSignalName(tagName, objectId)
+end
+
 local function waitForRewardUse(reward)
 	if reward == nil then return end
 	reward.NotifyName = "OnUsed"..reward.ObjectId
-	local customSignalName = "MultiTrait_OnUsed"..reward.ObjectId
-	waitUntil(customSignalName, "MultiTrait_RewardSpawner")
+	waitUntil(getSignalName("OnUsed", reward.ObjectId), getTagName("RewardSpawner"))
 end
 
 function patch_OnUsed(triggerArgs)
@@ -53,9 +64,9 @@ function patch_OnUsed(triggerArgs)
 
 	if usee.OnUsedGameStateRequirements == nil or IsGameStateEligible(CurrentRun, usee, usee.OnUsedGameStateRequirements) then
 		if usee.NotifyName ~= nil and usee.ObjectId then
-			local signalName = "MultiTrait_OnUsed"..usee.ObjectId
-			notifyExistingWaiters(signalName)
-			printMsg("Triggered %s", signalName)
+			local customSignalName = getSignalName("OnUsed", usee.ObjectId)
+			notifyExistingWaiters(customSignalName)
+			printMsg("Triggered %s", customSignalName)
 		end
 	end
 end
@@ -112,7 +123,7 @@ function patch_SpawnRoomReward(base, eventSource, args)
 	thread(SpawnRewardCopies, base, reward, rewardCount - 1, eventSource, args)
 
 	if waitForLast then
-		waitUntil("MultiTrait_AllRewardsAcquired")
+		waitUntil(getSignalName("AllRewardsAcquired"))
 	end
     return reward
 end
@@ -130,7 +141,7 @@ function SpawnRewardCopies(base, originalReward, rewardCount, eventSource, args)
 	
 	-- Wait once more before unlocking the door
 	waitForRewardUse(reward)
-	notifyExistingWaiters("MultiTrait_AllRewardsAcquired")
+	notifyExistingWaiters(getSignalName("AllRewardsAcquired"))
 	ActiveRewardSpawners = ActiveRewardSpawners - 1
 end
 
@@ -173,7 +184,7 @@ function patch_UseNPC(base, npc, args, user)
 	if ActiveRewardSpawners == 0 then
 		thread(RefreshNPC, rewardCount - 1, npc)
 	else 
-		notifyExistingWaiters("MultiTrait_NPCUsed")
+		notifyExistingWaiters(getSignalName("NPCUsed"))
 	end
 end
 
@@ -190,7 +201,7 @@ function patch_UseLoot(base, usee, args, user)
 	if ActiveRewardSpawners == 0 then
 		thread(RefreshNPC, rewardCount - 1, usee)
 	else 
-		notifyExistingWaiters("MultiTrait_NPCUsed")
+		notifyExistingWaiters(getSignalName("NPCUsed"))
 	end
 end
 
@@ -209,15 +220,15 @@ function RefreshNPC(amount, npc)
 		-- Refill upgrade options
 		npc.UpgradeOptions = nil
 		printMsg("NPC refreshed")
-		waitUntil("MultiTrait_NPCUsed", "MultiTrait_RewardSpawner")
+		waitUntil(getSignalName("NPCUsed"), getTagName("RewardSpawner"))
 	end
 	ActiveRewardSpawners = ActiveRewardSpawners - 1
-	notifyExistingWaiters("MultiTrait_AllNPCRewardsAcquired")
+	notifyExistingWaiters(getSignalName("AllNPCRewardsAcquired"))
 end
 
 function patch_ErisTakeOff(base, eris)
 	if ActiveRewardSpawners > 0 or getRewardCount(Config.RewardCount.Story, "Eris") > 1 then
-		waitUntil("MultiTrait_AllNPCRewardsAcquired", "MultiTrait_NPCHandler")
+		waitUntil(getSignalName("AllNPCRewardsAcquired"), getTagName("NPCHandler"))
 	end
 	base(eris)
 end
@@ -231,7 +242,7 @@ function patch_ArtemisExitPresentation(base, source, args)
 end
 
 function ArtemisThreadedExit(base, source, args)
-	waitUntil("MultiTrait_AllNPCRewardsAcquired", "MultiTrait_NPCHandler")
+	waitUntil(getSignalName("AllNPCRewardsAcquired"), getTagName("NPCHandler"))
 	base(source, args)
 end
 
@@ -264,8 +275,8 @@ function patch_StartFieldsEncounter(base, rewardCage, args)
 end
 
 function patch_LeaveRoom(base, currentRun, door)
-	killTaggedThreads("MultiTrait_RewardSpawner")
-	killTaggedThreads("MultiTrait_NPCHandler")
+	killTaggedThreads(getTagName("RewardSpawner"))
+	killTaggedThreads(getTagName("NPCHandler"))
 	ActiveCages = 0
 	ActiveRewardSpawners = 0
 	base(currentRun, door)
