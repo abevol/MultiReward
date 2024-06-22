@@ -35,6 +35,31 @@ local function getRewardCount(config, rewardType, lootName)
     return v
 end
 
+local function waitForRewardUse(reward)
+	if reward == nil then return end
+	reward.NotifyName = "OnUsed"..reward.ObjectId
+	local customSignalName = "MultiTrait_OnUsed"..reward.ObjectId
+	waitUntil(customSignalName, "MultiTrait_RewardSpawner")
+end
+
+function patch_OnUsed(triggerArgs)
+	local usee = triggerArgs.TriggeredByTable
+	if usee == nil then
+		return
+	end
+	if usee.UnuseableWhenDead and usee.IsDead then
+		return
+	end
+
+	if usee.OnUsedGameStateRequirements == nil or IsGameStateEligible(CurrentRun, usee, usee.OnUsedGameStateRequirements) then
+		if usee.NotifyName ~= nil and usee.ObjectId then
+			local signalName = "MultiTrait_OnUsed"..usee.ObjectId
+			notifyExistingWaiters(signalName)
+			printMsg("Triggered %s", signalName)
+		end
+	end
+end
+
 function patch_StartNewRun(base, prevRun, args)
 	local currentRun = base(prevRun, args)
 
@@ -99,28 +124,12 @@ function SpawnRewardCopies(base, originalReward, rewardCount, eventSource, args)
 	ActiveRewardSpawners = ActiveRewardSpawners + 1
 
 	for i = 1, rewardCount do
-		-- Waiting logic directly copied from functions in the game source code
-		if reward ~= nil then
-			if reward.MenuNotify ~= nil then
-				waitUntil(UIData.BoonMenuId, "MultiTrait_RewardSpawner")
-			else
-				reward.NotifyName = "OnUsed"..reward.ObjectId
-				waitUntil(reward.NotifyName, "MultiTrait_RewardSpawner")
-			end
-		end
-
+		waitForRewardUse(reward)
         reward = base(eventSource, args)
     end
 	
 	-- Wait once more before unlocking the door
-	if reward ~= nil then
-		if reward.MenuNotify ~= nil then
-			waitUntil(UIData.BoonMenuId, "MultiTrait_RewardSpawner")
-		else
-			reward.NotifyName = "OnUsed"..reward.ObjectId
-			waitUntil(reward.NotifyName, "MultiTrait_RewardSpawner")
-		end
-	end
+	waitForRewardUse(reward)
 	notifyExistingWaiters("MultiTrait_AllRewardsAcquired")
 	ActiveRewardSpawners = ActiveRewardSpawners - 1
 end
@@ -145,15 +154,7 @@ function SpawnStoreItemCopies(base, originalReward, rewardCount, itemData, kitId
 	ActiveRewardSpawners = ActiveRewardSpawners + 1
 
 	for i = 1, rewardCount do
-		if reward ~= nil then
-			if reward.MenuNotify ~= nil then
-				waitUntil(UIData.BoonMenuId, "MultiTrait_RewardSpawner")
-			else
-				reward.NotifyName = "OnUsed"..reward.ObjectId
-				waitUntil(reward.NotifyName, "MultiTrait_RewardSpawner")
-			end
-		end
-
+		waitForRewardUse(reward)
         reward = base(itemData, kitId)
     end
 	ActiveRewardSpawners = ActiveRewardSpawners - 1
