@@ -139,8 +139,15 @@ function SpawnRewardCopies(base, originalReward, rewardCount, eventSource, args)
         reward = base(eventSource, args)
     end
 	
-	-- Wait once more before unlocking the door
-	waitForRewardUse(reward)
+	-- Wait for last boon choice selection
+	if reward ~= nil then
+		if reward.MenuNotify ~= nil then
+			waitUntil(UIData.BoonMenuId, getTagName("RewardSpawner"))
+		else
+			reward.NotifyName = "OnUsed"..reward.ObjectId
+			waitUntil(reward.NotifyName, getTagName("RewardSpawner"))
+		end
+	end
 	notifyExistingWaiters(getSignalName("AllRewardsAcquired"))
 	ActiveRewardSpawners = ActiveRewardSpawners - 1
 end
