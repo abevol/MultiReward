@@ -141,12 +141,8 @@ function SpawnRewardCopies(base, originalReward, rewardCount, eventSource, args)
 	
 	-- Wait for last boon choice selection
 	if reward ~= nil then
-		if reward.MenuNotify ~= nil then
-			waitUntil(UIData.BoonMenuId, getTagName("RewardSpawner"))
-		else
-			reward.NotifyName = "OnUsed"..reward.ObjectId
-			waitUntil(reward.NotifyName, getTagName("RewardSpawner"))
-		end
+		reward.NotifyName = "OnUsed"..reward.ObjectId
+		waitUntil(reward.NotifyName, getTagName("RewardSpawner"))
 	end
 	notifyExistingWaiters(getSignalName("AllRewardsAcquired"))
 	ActiveRewardSpawners = ActiveRewardSpawners - 1
