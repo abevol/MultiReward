@@ -7,6 +7,12 @@
 -- 	so you will most likely want to have it reference
 --	values and functions later defined in `reload.lua`.
 
+OnUsed{
+	function(triggerArgs)
+		patch_OnUsed(triggerArgs)
+	end
+}
+
 ModUtil.mod.Path.Wrap("StartNewRun", function(base, prevRun, args)
 	return patch_StartNewRun(base, prevRun, args)
 end)

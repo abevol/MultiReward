@@ -37,6 +37,7 @@ Config = Chalk.auto 'config.lua'
 -- ^ this updates our `.cfg` file in the config folder!
 public.config = Config -- so other mods can access our config
 
+SignalPrefix = "Abevol-MultiReward"
 ActiveCages = 0
 ActiveRewardSpawners = 0
 
