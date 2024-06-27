@@ -99,6 +99,24 @@ function patch_StartNewRun(base, prevRun, args)
 	return currentRun
 end
 
+function roomHasChaosTrialReward()
+	local currentRoom = Game.CurrentRun.CurrentRoom
+	local bountyName = Game.CurrentRun.ActiveBounty or Game.GameState.ActiveShrineBounty
+	local bountyData = Game.BountyData[bountyName]
+	if bountyData ~= nil then
+		if not Game.GameState.BountiesCompleted[bountyName] or bountyData.Repeatable then
+			if (bountyData.Encounter == currentRoom.Encounter.Name or bountyData.Room == currentRoom.Name) then
+				if IsGameStateEligible( Game.CurrentRun, currentRoom, bountyData.UnlockGameStateRequirements ) and IsGameStateEligible( Game.CurrentRun, currentRoom, bountyData.CompleteGameStateRequirements ) then
+					if bountyData.EndRunOnCompletion then
+						return true
+					end
+				end
+			end
+		end
+	end
+	return false
+end
+
 function patch_SpawnRoomReward(base, eventSource, args)
 	args = args or {}
     local reward = nil
@@ -115,7 +133,8 @@ function patch_SpawnRoomReward(base, eventSource, args)
 	-- First room of run uses this
 	local waitForLast = args.WaitUntilPickup
 	args.WaitUntilPickup = false
-	if Config.UpgradesOptional then
+	-- Rooms blocking gift boons indicate that it is not possible to collect the dropped items (for example Asphodel anomaly)
+	if Config.UpgradesOptional and not currentRoom.BlockGiftBoons and not roomHasChaosTrialReward() then
 		args.NotRequiredPickup = true
 	end
 
