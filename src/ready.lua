@@ -41,6 +41,10 @@ ModUtil.mod.Path.Wrap("ArtemisExitPresentation", function(base, source, args)
 	return patch_ArtemisExitPresentation(base, source, args)
 end)
 
+ModUtil.mod.Path.Wrap("IcarusExitPresentation", function(base, source, args)
+	return patch_IcarusExitPresentation(base, source, args)
+end)
+
 ModUtil.mod.Path.Wrap("NemesisTakeRoomExit", function(base, eventSource, args)
 	return patch_NemesisTakeRoomExit(base, eventSource, args)
 end)

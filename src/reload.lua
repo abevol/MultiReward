@@ -95,7 +95,7 @@ function patch_StartNewRun(base, prevRun, args)
 
 		printMsg("Added shop price reduction by %s%%", tostring(storeCostMultiplier * 100))
 	end
-	
+
 	return currentRun
 end
 
@@ -246,6 +246,13 @@ end
 
 function ArtemisThreadedExit(base, source, args)
 	waitUntil(getSignalName("AllNPCRewardsAcquired"), getTagName("NPCHandler"))
+	base(source, args)
+end
+
+function patch_IcarusExitPresentation(base, source, args)
+	if ActiveRewardSpawners > 0 or getRewardCount(Config.RewardCount.Story, "Icarus") > 1 then
+		waitUntil(getSignalName("AllNPCRewardsAcquired"), getTagName("NPCHandler"))
+	end
 	base(source, args)
 end
 
