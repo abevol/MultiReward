@@ -95,60 +95,7 @@ function patch_StartNewRun(base, prevRun, args)
 
 		printMsg("Added shop price reduction by %s%%", tostring(storeCostMultiplier * 100))
 	end
-
-	EncounterSets.OEncountersDefault = {
-		"GeneratedO",
-
-		"IcarusCombatO",
-		"IcarusCombatO",
-		"IcarusCombatO",
-		"IcarusCombatO",
-		"IcarusCombatO",
-		"IcarusCombatO",
-		"IcarusCombatO",
-		"IcarusCombatO",
-		"IcarusCombatO",
-		"IcarusCombatO",
-		"IcarusCombatO",
-		"IcarusCombatO",
-		"IcarusCombatO",
-		"IcarusCombatO",
-
-		"IcarusCombatO2",
-		"IcarusCombatO2",
-		"IcarusCombatO2",
-		"IcarusCombatO2",
-		"IcarusCombatO2",
-		"IcarusCombatO2",
-		"IcarusCombatO2",
-		"IcarusCombatO2",
-		"IcarusCombatO2",
-		"IcarusCombatO2",
-		"IcarusCombatO2",
-		"IcarusCombatO2",
-		"IcarusCombatO2",
-		"IcarusCombatO2",
-		"IcarusCombatO2",
-		"IcarusCombatO2",
-		"IcarusCombatO2",
-		"IcarusCombatO2",
-		"IcarusCombatO2",
-		"IcarusCombatO2",
-
-		-- intro encounters weighted higher
-		"IcarusCombatIntro",
-		"IcarusCombatIntro",
-		"IcarusCombatIntro",
-		"IcarusCombatIntro",
-		"IcarusCombatIntro",
-		"IcarusCombatIntro",
-		"IcarusCombatIntro",
-		"IcarusCombatIntro",
-		"IcarusCombatIntro",
-	}
-	EncounterData.BaseIcarusCombat.GameStateRequirements = {}
-	CurrentRun.CurrentRoom = CreateRoom(RoomData["O_Intro"]);
-
+	
 	return currentRun
 end
 
