@@ -96,6 +96,59 @@ function patch_StartNewRun(base, prevRun, args)
 		printMsg("Added shop price reduction by %s%%", tostring(storeCostMultiplier * 100))
 	end
 
+	EncounterSets.OEncountersDefault = {
+		"GeneratedO",
+
+		"IcarusCombatO",
+		"IcarusCombatO",
+		"IcarusCombatO",
+		"IcarusCombatO",
+		"IcarusCombatO",
+		"IcarusCombatO",
+		"IcarusCombatO",
+		"IcarusCombatO",
+		"IcarusCombatO",
+		"IcarusCombatO",
+		"IcarusCombatO",
+		"IcarusCombatO",
+		"IcarusCombatO",
+		"IcarusCombatO",
+
+		"IcarusCombatO2",
+		"IcarusCombatO2",
+		"IcarusCombatO2",
+		"IcarusCombatO2",
+		"IcarusCombatO2",
+		"IcarusCombatO2",
+		"IcarusCombatO2",
+		"IcarusCombatO2",
+		"IcarusCombatO2",
+		"IcarusCombatO2",
+		"IcarusCombatO2",
+		"IcarusCombatO2",
+		"IcarusCombatO2",
+		"IcarusCombatO2",
+		"IcarusCombatO2",
+		"IcarusCombatO2",
+		"IcarusCombatO2",
+		"IcarusCombatO2",
+		"IcarusCombatO2",
+		"IcarusCombatO2",
+
+		-- intro encounters weighted higher
+		"IcarusCombatIntro",
+		"IcarusCombatIntro",
+		"IcarusCombatIntro",
+		"IcarusCombatIntro",
+		"IcarusCombatIntro",
+		"IcarusCombatIntro",
+		"IcarusCombatIntro",
+		"IcarusCombatIntro",
+		"IcarusCombatIntro",
+	}
+	EncounterData.BaseIcarusCombat.GameStateRequirements = {}
+	CurrentRun.CurrentRoom = CreateRoom(RoomData["O_Intro"]);
+
 	return currentRun
 end
 
@@ -247,6 +300,20 @@ end
 function ArtemisThreadedExit(base, source, args)
 	waitUntil(getSignalName("AllNPCRewardsAcquired"), getTagName("NPCHandler"))
 	base(source, args)
+end
+
+function patch_NemesisTakeRoomExit(base, eventSource, args)
+
+	local nemesis = SessionMapState.Nemesis
+	if nemesis.Exiting then
+		return
+	end
+
+	if (not Config.CagesOptional) and ActiveCages > 0 then
+		NemesisTeleportExitPresentation( nemesis, args )
+		return
+	end
+	base(eventSource, args)
 end
 
 function patch_SetTraitTextData(base, traitData, args)
