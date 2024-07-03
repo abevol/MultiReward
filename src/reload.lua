@@ -141,7 +141,7 @@ function patch_SpawnRoomReward(base, eventSource, args)
 	reward = base(eventSource, args)
 	thread(SpawnRewardCopies, base, reward, rewardCount - 1, eventSource, args)
 
-	if waitForLast then
+	if reward ~= nil and waitForLast then
 		waitUntil(getSignalName("AllRewardsAcquired"))
 	end
     return reward
