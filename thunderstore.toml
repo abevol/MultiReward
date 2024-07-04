@@ -4,7 +4,7 @@ schemaVersion = "0.0.1"
 [package]
 namespace = "Abevol"
 name = "MultiReward"
-versionNumber = "1.1.1"
+versionNumber = "1.2.0"
 description = "Get multiple room rewards."
 websiteUrl = "https://github.com/abevol/MultiReward"
 containsNsfwContent = false

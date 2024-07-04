@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2024-07-04
+
 ### Added
 
 - Multiple story rewards
@@ -105,7 +107,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First version of the mod!
 
-[unreleased]: https://github.com/abevol/MultiReward/compare/1.1.1...HEAD
+[unreleased]: https://github.com/abevol/MultiReward/compare/1.2.0...HEAD
+[1.2.0]: https://github.com/abevol/MultiReward/compare/1.1.1...1.2.0
 [1.1.1]: https://github.com/abevol/MultiReward/compare/1.1.0...1.1.1
 [1.1.0]: https://github.com/abevol/MultiReward/compare/1.0.8...1.1.0
 [1.0.8]: https://github.com/abevol/MultiReward/compare/1.0.7...1.0.8
