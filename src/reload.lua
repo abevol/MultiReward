@@ -355,8 +355,10 @@ function patch_CreateConsumableItem(base, consumableId, consumableName, costOver
 
 	-- Make reward accessible for the bow indicators in the fields of mourning
 	if Config.UpgradesOptional then
-		if Game.CurrentRun.CurrentRoom.Using and Game.CurrentRun.CurrentRoom.Using.Spawn and Game.CurrentRun.CurrentRoom.Using.Spawn == "FieldsRewardCage" and consumable.Name ~= "ManaDropMinorPoseidon" then
-			MapState.OptionalRewards[consumable.ObjectId] = consumable
+		if Game.CurrentRun.CurrentRoom.Using and Game.CurrentRun.CurrentRoom.Using.Spawn and Game.CurrentRun.CurrentRoom.Using.Spawn == "FieldsRewardCage" then
+			if consumable.Name ~= "ManaDropZeus" and consumable.Name ~= "ManaDropMinorPoseidon" then
+				MapState.OptionalRewards[consumable.ObjectId] = consumable
+			end
 		end
 	end
 
