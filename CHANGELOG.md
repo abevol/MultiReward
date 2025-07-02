@@ -7,11 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2025-07-02
+
 ### Added
+
 - Safeguard against "Travel Deal" from Hermes
 - A lot more rewards are now affected (Night challenge rewards, Chaos trial rewards, Loot generated from Poseidon's Buried Treasure, ...)
 
 ### Fixed
+
 - Pins not working with the "Unseen Update"
 - Room Exits not opening up
 
@@ -115,7 +119,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First version of the mod!
 
-[unreleased]: https://github.com/abevol/MultiReward/compare/1.2.0...HEAD
+[unreleased]: https://github.com/abevol/MultiReward/compare/1.3.0...HEAD
+[1.3.0]: https://github.com/abevol/MultiReward/compare/1.2.0...1.3.0
 [1.2.0]: https://github.com/abevol/MultiReward/compare/1.1.1...1.2.0
 [1.1.1]: https://github.com/abevol/MultiReward/compare/1.1.0...1.1.1
 [1.1.0]: https://github.com/abevol/MultiReward/compare/1.0.8...1.1.0
