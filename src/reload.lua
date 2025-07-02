@@ -49,86 +49,267 @@ end
 
 local function waitForRewardUse(reward)
 	if reward == nil then return end
-	reward.NotifyName = "OnUsed"..reward.ObjectId
-	waitUntil(getSignalName("OnUsed", reward.ObjectId), getTagName("RewardSpawner"))
+	waitUntil(getSignalName("OnUseStarted", reward.ObjectId), getTagName("RewardSpawner"))
 end
 
-function patch_OnUsed(triggerArgs)
-	local usee = triggerArgs.TriggeredByTable
-	if usee == nil then
-		return
+local function waitForRewardUseCompleted(reward)
+	if reward == nil then return end
+	waitUntil(getSignalName("OnUseCompleted", reward.ObjectId), getTagName("RewardSpawner"))
+end
+
+local function waitForStoreRemoval(reward)
+    if reward == nil then return end
+	waitUntil(getSignalName("OnRemovedFromStore", reward.ObjectId), getTagName("RewardSpawner"))
+end
+
+---Repeats an item spawning callback a given number of times based on some conditions
+---@param initialId number
+---@param fromShop boolean
+---@param spawnInit function
+---@param amount number
+---@param blocking? boolean
+local function chainSpawn(initialId, fromShop, spawnInit, amount, blocking)
+    blocking = blocking == nil or blocking
+    printMsg("Spawn chain started "..(blocking and "(blocking)" or "(not blocking)")..", initial: "..initialId..(fromShop and ", from Shop" or ""))
+	if blocking then
+        ActiveRewardSpawners = ActiveRewardSpawners + 1
+    end
+
+    if fromShop then
+        waitForStoreRemoval({ ObjectId = initialId })
+    else
+        waitForRewardUse({ ObjectId = initialId })
+    end
+
+    ---@type function
+    local spawner = spawnInit()
+
+    for i = 1, amount do
+        InSpawnerContext = true
+        local reward = spawner()
+        InSpawnerContext = false
+        if reward == nil then
+            break
+        end
+        if i == amount then
+            waitForRewardUseCompleted({ ObjectId = reward.ObjectId })
+        else
+            waitForRewardUse({ ObjectId = reward.ObjectId })
+        end
+    end
+
+	if blocking then
+        ActiveRewardSpawners = ActiveRewardSpawners - 1
+    end
+    notifyExistingWaiters(getSignalName("AllRewardsAcquired"))
+    if CheckRoomExitsReady(Game.CurrentRun.CurrentRoom) then
+		UnlockRoomExits(Game.CurrentRun, Game.CurrentRun.CurrentRoom)
 	end
-	if usee.UnuseableWhenDead and usee.IsDead then
+    printMsg("Spawn chain completed "..(blocking and "(blocking)" or "(not blocking)")..", "..ActiveRewardSpawners.." left")
+end
+
+---Spawns an item with the given name
+---@param type string
+---@param name string
+---@param args? table
+---@return table|unknown|nil
+local function itemRepeater(type, name, args)
+    printMsg("Chain spawning type: "..type..", name: "..name)
+    args = args or {}
+    args.ResourceCosts = nil
+    local reward = nil
+    local spawnTarget = args.ChainSpawnTarget
+    
+    printMsg("Chosen spawn point: "..spawnTarget)
+    if spawnTarget <= 0 then
+        return nil
+    end
+
+    if type == "Consumable" then
+        if name == "SpellDrop" then name = "TalentDrop" end
+        local consumablePoint = SpawnObstacle({ Name = name, DestinationId = spawnTarget, Group = "Standing", OffsetX = args.ChainSpawnOffset.X, OffsetY = args.ChainSpawnOffset.Y })
+        reward = CreateConsumableItem( consumablePoint, name, 0, { IgnoreSounds = true, RunProgressUpgradeEligible = true } )
+        reward.CanDuplicate = false
+        if reward.ExtractValues ~= nil then
+            ExtractValues( CurrentRun.Hero, reward, reward )
+        end
+    elseif string.find(name, "WeaponUpgrade") then
+        reward = CreateWeaponLoot(MergeTables(args, { SpawnPoint = spawnTarget, SuppressSpawnSounds = true, OffsetX = args.ChainSpawnOffset.X, OffsetY = args.ChainSpawnOffset.Y }))
+    elseif string.find(name, "HermesUpgrade") then
+        reward = CreateHermesLoot(MergeTables(args, { SpawnPoint = spawnTarget, SuppressSpawnSounds = true, OffsetX = args.ChainSpawnOffset.X, OffsetY = args.ChainSpawnOffset.Y }))
+    else
+        reward = GiveLoot(MergeTables(args, { ForceLootName = name, SpawnPoint = spawnTarget, SuppressSpawnSounds = true, SuppressFlares = true, OffsetX = args.ChainSpawnOffset.X, OffsetY = args.ChainSpawnOffset.Y }))
+    end
+    SetObstacleProperty({ Property = "MagnetismWhileBlocked", Value = 0, DestinationId = reward.ObjectId })
+    return reward
+end
+
+function spawnerInit(type, name, args)
+    local allPoints = GetIdsByType ({ Names = {"SecretPoint", "EnemyPoint", "LootPoint" }})
+    local spawnTarget = GetClosest({ Id = Game.CurrentRun.Hero.ObjectId, DestinationIds = allPoints, Distance = 2000 })
+    local conventionalRewardTarget = SelectRoomRewardSpawnPoint(Game.CurrentRun.CurrentRoom)
+    args.ChainSpawnTarget = GetClosest({ Id = Game.CurrentRun.Hero.ObjectId, DestinationIds = { spawnTarget, conventionalRewardTarget } })
+    -- To account for Hermes' Travel Deal
+    if args.SeparateFromSlot and not args.ChainSpawnOffset then
+        angle = GetAngleBetween({ Id = Game.CurrentRun.Hero.ObjectId, DestinationId = spawnTarget })
+        args.ChainSpawnOffset = CalcOffset( math.rad(angle) + math.pi, 220 )
+        printMsg("Offsetting from spawn point: X="..args.ChainSpawnOffset.X..", Y="..args.ChainSpawnOffset.Y)
+    else
+        args.ChainSpawnOffset = { X = 0, Y = 0 }
+    end
+    return function ()
+        return itemRepeater(type, name, args)
+    end
+end
+
+function patch_RemoveStoreItem(base, args)
+    printMsg("RemoveStoreItem hook triggered")
+    InShopContext = true
+    if args.Id then
+        local customSignalName = getSignalName("OnRemovedFromStore", args.Id)
+        notifyExistingWaiters(customSignalName)
+        printMsg("Triggered %s", customSignalName)
+    end
+    base(args)
+    InShopContext = false
+end
+
+-- Currently Hades and Artemis in the Fields use this function for story rewards
+function patch_UseLoot(base, usee, args, user)
+    if usee.ObjectId then
+        local customSignalName = getSignalName("OnUseStarted", usee.ObjectId)
+        notifyExistingWaiters(customSignalName)
+        printMsg("Triggered %s", customSignalName)
+    end
+
+	if not usee or not usee.SpeakerName or (usee.SpeakerName ~= "Hades" and usee.SpeakerName ~= "Artemis") then
+		base(usee, args, user)
+
+        if usee.ObjectId then
+            local customSignalName = getSignalName("OnUseCompleted", usee.ObjectId)
+            notifyExistingWaiters(customSignalName)
+        end
 		return
 	end
 
-	if usee.OnUsedGameStateRequirements == nil or IsGameStateEligible(CurrentRun, usee, usee.OnUsedGameStateRequirements) then
-		if usee.NotifyName ~= nil and usee.ObjectId then
-			local customSignalName = getSignalName("OnUsed", usee.ObjectId)
-			notifyExistingWaiters(customSignalName)
-			printMsg("Triggered %s", customSignalName)
-		end
+	local rewardCount = getRewardCount(Config.RewardCount.Story, usee.SpeakerName)
+
+	base(usee, args, user)
+	if ActiveRewardSpawners == 0 then
+		thread(RefreshNPC, rewardCount - 1, usee)
+	else 
+		notifyExistingWaiters(getSignalName("NPCUsed"))
 	end
 end
 
-function patch_StartNewRun(base, prevRun, args)
-	local currentRun = base(prevRun, args)
+function patch_OpenSpellScreen(base, spellItem, args, user)
+    if spellItem.ObjectId then
+        local customSignalName = getSignalName("OnUseStarted", spellItem.ObjectId)
+        notifyExistingWaiters(customSignalName)
+        printMsg("Triggered %s", customSignalName)
+    end
+    base(spellItem, args, user)
+    if spellItem.ObjectId then
+        local customSignalName = getSignalName("OnUseCompleted", spellItem.ObjectId)
+        notifyExistingWaiters(customSignalName)
+    end
+end
 
-	if GameState ~= nil and Game.CurrentRun.Hero ~= nil and Config.LowerShopPrices then
-		local storeCostMultiplier = 1 / Config.ShopItemCount.Others
-		local discountConfig = Config.ShopDiscountPercent
-		if discountConfig and discountConfig >= 0 and discountConfig <= 100 then
-			storeCostMultiplier = (100 - discountConfig) / 100
-		end
+function patch_UnwrapRandomLoot(base, source)
+    InSpawnerContext = true
+    base(source)
+    InSpawnerContext = false
+end
 
-		OverwriteTableKeys(TraitData, {
-			MultiTraitCostReduction = {
-				Hidden = true,
-				Icon = "Boon_Poseidon_33",
-				InheritFrom = { "BaseTrait" },
-				BlockInRunRarify = true,
-				StoreCostMultiplier = storeCostMultiplier
-			}
-		})
-		ProcessDataInheritance(TraitData.MultiTraitCostReduction, TraitData)
-		AddTrait(Game.CurrentRun.Hero, "MultiTraitCostReduction", "Common")
-
-		printMsg("Added shop price reduction by %s%%", tostring(storeCostMultiplier * 100))
-	end
-
-	return currentRun
+function patch_UseConsumableItem(base, consumableItem, args, user)
+    if consumableItem.ObjectId then
+        local customSignalName = getSignalName("OnUseStarted", consumableItem.ObjectId)
+        notifyExistingWaiters(customSignalName)
+        printMsg("Triggered %s", customSignalName)
+    end
+    base(consumableItem, args, user)
+    if consumableItem.ObjectId then
+        local customSignalName = getSignalName("OnUseCompleted", consumableItem.ObjectId)
+        notifyExistingWaiters(customSignalName)
+    end
 end
 
 function roomHasChaosTrialReward()
 	local currentRoom = Game.CurrentRun.CurrentRoom
-	local bountyName = Game.CurrentRun.ActiveBounty or Game.GameState.ActiveShrineBounty
+	local bountyName = Game.CurrentRun.ActiveBounty
 	local bountyData = Game.BountyData[bountyName]
 	if bountyData ~= nil then
-		if not Game.GameState.BountiesCompleted[bountyName] or bountyData.Repeatable then
-			if (bountyData.Encounter == currentRoom.Encounter.Name or bountyData.Room == currentRoom.Name) then
-				if IsGameStateEligible( Game.CurrentRun, currentRoom, bountyData.UnlockGameStateRequirements ) and IsGameStateEligible( Game.CurrentRun, currentRoom, bountyData.CompleteGameStateRequirements ) then
-					if bountyData.EndRunOnCompletion then
-						return true
-					end
-				end
-			end
-		end
+        for _, name in ipairs(bountyData.Encounters) do
+            if name == currentRoom.Encounter.Name and bountyData.EndRunOnCompletion then
+                printMsg("This is the final room of a Chaos trial!")
+                return true
+            end
+        end
 	end
 	return false
+end
+
+function patch_CreateLoot(base, args)
+	if Config.UpgradesOptional then
+        printMsg("[Loot] Blocking Exit disabled")
+		args.DoesNotBlockExit = true
+	end
+	if ActiveRewardSpawners > 0 then
+		args.SuppressSpawnSounds = true
+	end
+
+	local reward = base(args)
+	
+	-- Make reward accessible for the bow indicators in the fields of mourning
+	if Config.UpgradesOptional then
+		if Game.CurrentRun.CurrentRoom.Using and Game.CurrentRun.CurrentRoom.Using.Spawn and Game.CurrentRun.CurrentRoom.Using.Spawn == "FieldsRewardCage" then
+			MapState.OptionalRewards[reward.ObjectId] = reward
+		end
+	end
+
+    if not InSpawnerContext then
+        local amount = getRewardCount(InShopContext and Config.ShopItemCount or Config.RewardCount, (string.find(reward.Name, "StackUpgrade") or string.find(reward.Name, "WeaponUpgrade")) and reward.Name or "Boon", reward.Name)
+
+        local debugMsg = string.format("RewardCount: %d, RewardType: %s%s", amount, "Loot", reward.Name and ", LootName: " .. reward.Name or "")
+        printMsg("%s", debugMsg)
+        if Config.Debug then ModUtil.mod.Hades.PrintOverhead(debugMsg, 5) end
+
+        args.SeparateFromSlot = InShopContext
+        thread(chainSpawn, reward.ObjectId, InShopContext, function()
+            return spawnerInit("Loot", reward.Name, args)
+        end, amount - 1, ShouldBeBlocking)
+    end
+
+	return reward
+end
+
+function patch_CreateConsumableItemFromData(base, consumableId, consumableItem, costOverride, args)
+    local reward = base(consumableId, consumableItem, costOverride, args)
+
+    if not InSpawnerContext then
+        args = args or {}
+        local amount = getRewardCount(InShopContext and Config.ShopItemCount or Config.RewardCount, InShopContext and "Consumable" or reward.Name, reward.Name)
+
+        local debugMsg = string.format("RewardCount: %d, RewardType: %s%s", amount, "Consumable", reward.Name and ", LootName: " .. reward.Name or "")
+        printMsg("%s", debugMsg)
+        if Config.Debug then ModUtil.mod.Hades.PrintOverhead(debugMsg, 5) end
+
+        if not ShouldBeBlocking or string.find(reward.Name, "HealDrop") then
+            printMsg(reward.Name.." will not block exits")
+        end
+        args.SeparateFromSlot = InShopContext
+        thread(chainSpawn, reward.ObjectId, InShopContext, function()
+            return spawnerInit("Consumable", reward.Name, args)
+        end, amount - 1, ShouldBeBlocking and not string.find(reward.Name, "HealDrop"))
+    end
+
+    return reward
 end
 
 function patch_SpawnRoomReward(base, eventSource, args)
 	args = args or {}
     local reward = nil
     local currentRoom = Game.CurrentRun.CurrentRoom
-    local currentEncounter = Game.CurrentRun.CurrentRoom.Encounter
-    local rewardType = args.RewardOverride or currentEncounter.EncounterRoomRewardOverride or currentRoom.ChangeReward or currentRoom.ChosenRewardType
-    local lootName = args.LootName or currentRoom.ForceLootName
-    local rewardCount = getRewardCount(Config.RewardCount, rewardType, lootName)
-
-    local debugMsg = string.format("RewardCount: %d, RewardType: %s%s", rewardCount, rewardType, lootName and ", LootName: " .. lootName or "")
-    printMsg("%s", debugMsg)
-    if Config.Debug then ModUtil.mod.Hades.PrintOverhead(debugMsg, 5) end
 
 	-- First room of run uses this
 	local waitForLast = args.WaitUntilPickup
@@ -136,10 +317,12 @@ function patch_SpawnRoomReward(base, eventSource, args)
 	-- Rooms blocking gift boons indicate that it is not possible to collect the dropped items (for example Asphodel anomaly)
 	if Config.UpgradesOptional and not currentRoom.BlockGiftBoons and not roomHasChaosTrialReward() then
 		args.NotRequiredPickup = true
+    else
+        ShouldBeBlocking = true
 	end
 
 	reward = base(eventSource, args)
-	thread(SpawnRewardCopies, base, reward, rewardCount - 1, eventSource, args)
+    ShouldBeBlocking = false
 
 	if reward ~= nil and waitForLast then
 		waitUntil(getSignalName("AllRewardsAcquired"))
@@ -147,50 +330,16 @@ function patch_SpawnRoomReward(base, eventSource, args)
     return reward
 end
 
--- Does the reward spawning in another thread to allow the player to leave the room before picking up all rewards while still spawning the rewards one at a time
-function SpawnRewardCopies(base, originalReward, rewardCount, eventSource, args)
-    local reward = originalReward
-	args.WaitUntilPickup = false
-	ActiveRewardSpawners = ActiveRewardSpawners + 1
-
-	for i = 1, rewardCount do
-		waitForRewardUse(reward)
-        reward = base(eventSource, args)
-    end
-	
-	-- Wait for last boon choice selection
-	if reward ~= nil then
-		reward.NotifyName = "OnUsed"..reward.ObjectId
-		waitUntil(reward.NotifyName, getTagName("RewardSpawner"))
-	end
-	notifyExistingWaiters(getSignalName("AllRewardsAcquired"))
-	ActiveRewardSpawners = ActiveRewardSpawners - 1
+function patch_SpawnStoreItemsInWorld(base, room, args)
+	InShopContext = true
+    base(room, args)
+    InShopContext = false
 end
 
-function patch_SpawnStoreItemInWorld(base, itemData, kitId)
-	local spawnedItem = nil
-	local shopItemCount = getRewardCount(Config.ShopItemCount, itemData.Type, itemData.Name)
-
-    local debugMsg = string.format("ShopItemCount: %d, Type: %s%s", shopItemCount, itemData.Type, itemData.Name and ", Name: " .. itemData.Name or "")
-    printMsg("%s", debugMsg)
-    if Config.Debug then ModUtil.mod.Hades.PrintOverhead(debugMsg, 5) end
-
-	spawnedItem = base(itemData, kitId)
-	thread(SpawnStoreItemCopies, base, spawnedItem, shopItemCount - 1, itemData, kitId)
-
-	return spawnedItem
-end
-
--- Does the store item spawning in another thread to spawn the rewards one at a time for a better visual experience
-function SpawnStoreItemCopies(base, originalReward, rewardCount, itemData, kitId)
-    local reward = originalReward
-	ActiveRewardSpawners = ActiveRewardSpawners + 1
-
-	for i = 1, rewardCount do
-		waitForRewardUse(reward)
-        reward = base(itemData, kitId)
-    end
-	ActiveRewardSpawners = ActiveRewardSpawners - 1
+function patch_StartDevotionTest(base, currentEncounter, args)
+    base(currentEncounter, args)
+    -- Devotions just despawn the boon that doesn't get taken, so we need to discard the chain spawner as well
+    ActiveRewardSpawners = ActiveRewardSpawners - 1
 end
 
 function patch_UseNPC(base, npc, args, user)
@@ -210,23 +359,6 @@ function patch_UseNPC(base, npc, args, user)
 	end
 end
 
--- Currently Hades and Artemis in the Fields use this function for story rewards
-function patch_UseLoot(base, usee, args, user)
-	if not usee or not usee.SpeakerName or (usee.SpeakerName ~= "Hades" and usee.SpeakerName ~= "Artemis") then
-		base(usee, args, user)
-		return
-	end
-
-	local rewardCount = getRewardCount(Config.RewardCount.Story, usee.SpeakerName)
-
-	base(usee, args, user)
-	if ActiveRewardSpawners == 0 then
-		thread(RefreshNPC, rewardCount - 1, usee)
-	else 
-		notifyExistingWaiters(getSignalName("NPCUsed"))
-	end
-end
-
 function RefreshNPC(amount, npc)
 	ActiveRewardSpawners = ActiveRewardSpawners + 1
 	for _ = 1, amount do
@@ -237,6 +369,13 @@ function RefreshNPC(amount, npc)
 				CheckPartnerConversations( npc )
 			end
 			SetNextInteractLines( npc, npc.NextInteractLines )
+        else
+            ActiveRewardSpawners = ActiveRewardSpawners - 1
+            notifyExistingWaiters(getSignalName("AllNPCRewardsAcquired"))
+            if CheckRoomExitsReady(Game.CurrentRun.CurrentRoom) then
+                UnlockRoomExits(Game.CurrentRun, Game.CurrentRun.CurrentRoom)
+            end
+            return
 		end
 		SetAvailableUseText(npc)
 		-- Refill upgrade options
@@ -246,6 +385,9 @@ function RefreshNPC(amount, npc)
 	end
 	ActiveRewardSpawners = ActiveRewardSpawners - 1
 	notifyExistingWaiters(getSignalName("AllNPCRewardsAcquired"))
+    if CheckRoomExitsReady(Game.CurrentRun.CurrentRoom) then
+        UnlockRoomExits(Game.CurrentRun, Game.CurrentRun.CurrentRoom)
+    end
 end
 
 function patch_ErisTakeOff(base, eris)
@@ -325,51 +467,17 @@ function patch_LeaveRoom(base, currentRun, door)
 	base(currentRun, door)
 end
 
-function patch_CreateLoot(base, args)
-	if Config.UpgradesOptional then
-		args.DoesNotBlockExit = true
-	end
-	if ActiveRewardSpawners > 0 then
-		args.SuppressSpawnSounds = true
-	end
-
-	local reward = base(args)
-	
-	-- Make reward accessible for the bow indicators in the fields of mourning
-	if Config.UpgradesOptional then
-		if Game.CurrentRun.CurrentRoom.Using and Game.CurrentRun.CurrentRoom.Using.Spawn and Game.CurrentRun.CurrentRoom.Using.Spawn == "FieldsRewardCage" then
-			MapState.OptionalRewards[reward.ObjectId] = reward
-		end
-	end
-
-	return reward
-end
-
-function patch_CreateConsumableItem(base, consumableId, consumableName, costOverride, args) 
-	args = args or {}
-	if ActiveRewardSpawners > 0 then
-		args.IgnoreSounds = true
-	end
-
-	local consumable = base(consumableId, consumableName, costOverride, args)
-
-	-- Make reward accessible for the bow indicators in the fields of mourning
-	if Config.UpgradesOptional then
-		if Game.CurrentRun.CurrentRoom.Using and Game.CurrentRun.CurrentRoom.Using.Spawn and Game.CurrentRun.CurrentRoom.Using.Spawn == "FieldsRewardCage" then
-			if consumable.Name ~= "ManaDropZeus" and consumable.Name ~= "ManaDropMinorPoseidon" then
-				MapState.OptionalRewards[consumable.ObjectId] = consumable
-			end
-		end
-	end
-
-	return consumable
-end
-
 function patch_CheckRoomExitsReady(base, currentRoom)
+    local isShopOrEmpty = false
+    for _, value in ipairs(Game.CurrentRun.CurrentRoom.LegalEncounters) do
+        if value == "Shop" or value == "Empty" or value == "TyphonShop" then
+            isShopOrEmpty = true
+        end
+    end
 	if not Config.CagesOptional and ActiveCages > 0 then
 		return false
 	end
-	if not Config.UpgradesOptional and ActiveRewardSpawners > 0 then
+	if not Config.UpgradesOptional and ActiveRewardSpawners > 0 and not isShopOrEmpty then
 		return false
 	end
 	return base(currentRoom)

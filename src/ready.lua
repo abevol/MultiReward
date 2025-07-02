@@ -7,22 +7,24 @@
 -- 	so you will most likely want to have it reference
 --	values and functions later defined in `reload.lua`.
 
-OnUsed{
-	function(triggerArgs)
-		patch_OnUsed(triggerArgs)
-	end
-}
-
 ModUtil.mod.Path.Wrap("StartNewRun", function(base, prevRun, args)
-	return patch_StartNewRun(base, prevRun, args)
+    return base(prevRun, args)
+end)
+
+ModUtil.mod.Path.Wrap("RemoveStoreItem", function(base, args)
+    return patch_RemoveStoreItem(base, args)
 end)
 
 ModUtil.mod.Path.Wrap("SpawnRoomReward", function(base, eventSource, args)
 	return patch_SpawnRoomReward(base, eventSource, args)
 end)
 
-ModUtil.mod.Path.Wrap("SpawnStoreItemInWorld", function(base, itemData, kitId)
-	return patch_SpawnStoreItemInWorld(base, itemData, kitId)
+ModUtil.mod.Path.Wrap("SpawnStoreItemsInWorld", function(base, room, args)
+	return patch_SpawnStoreItemsInWorld(base, room, args)
+end)
+
+ModUtil.mod.Path.Wrap("StartDevotionTest", function(base, currentEncounter, args)
+    return patch_StartDevotionTest(base, currentEncounter, args)
 end)
 
 ModUtil.mod.Path.Wrap("UseNPC", function(base, npc, args, user)
@@ -31,6 +33,18 @@ end)
 
 ModUtil.mod.Path.Wrap("UseLoot", function(base, usee, args, user)
 	return patch_UseLoot(base, usee, args, user)
+end)
+
+ModUtil.mod.Path.Wrap("OpenSpellScreen", function(base, spellItem, args, user)
+    return patch_OpenSpellScreen(base, spellItem, args, user)
+end)
+
+ModUtil.mod.Path.Wrap("UnwrapRandomLoot", function(base, source)
+    return patch_UnwrapRandomLoot(base, source)
+end)
+
+ModUtil.mod.Path.Wrap("UseConsumableItem", function(base, consumableItem, args, user)
+	return patch_UseConsumableItem(base, consumableItem, args, user)
 end)
 
 ModUtil.mod.Path.Wrap("ErisTakeOff", function(base, eris)
@@ -69,8 +83,8 @@ ModUtil.mod.Path.Wrap("CreateLoot", function(base, args)
 	return patch_CreateLoot(base, args)
 end)
 
-ModUtil.mod.Path.Wrap("CreateConsumableItem", function(base, consumableId, consumableName, costOverride, args)
-	return patch_CreateConsumableItem(base, consumableId, consumableName, costOverride, args)
+ModUtil.mod.Path.Wrap("CreateConsumableItemFromData", function(base, consumableId, consumableItem, costOverride, args)
+	return patch_CreateConsumableItemFromData(base, consumableId, consumableItem, costOverride, args)
 end)
 
 ModUtil.mod.Path.Wrap("CheckRoomExitsReady", function(base, currentRoom)
@@ -85,7 +99,7 @@ ModUtil.mod.Path.Wrap("HandleUpgradeChoiceSelection", function(base, screen, but
 	return patch_HandleUpgradeChoiceSelection(base, screen, button, args)
 end)
 
-ModUtil.mod.Path.Wrap("TraitTrayCalcPinSpacing", function(base, screen)
+--[[ ModUtil.mod.Path.Wrap("TraitTrayCalcPinSpacing", function(base, screen)
 	return patch_TraitTrayCalcPinSpacing(base, screen)
 end)
 
@@ -95,4 +109,4 @@ end)
 
 ModUtil.mod.Path.Wrap("PinTraitDetails", function(base, screen, button, args)
 	return patch_PinTraitDetails(base, screen, button, args)
-end)
+end) ]]

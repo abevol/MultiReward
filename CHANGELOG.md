@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Safeguard against "Travel Deal" from Hermes
+- A lot more rewards are now affected (Night challenge rewards, Chaos trial rewards, Loot generated from Poseidon's Buried Treasure, ...)
+
+### Fixed
+- Pins not working with the "Unseen Update"
+- Room Exits not opening up
+
 ## [1.2.0] - 2024-07-04
 
 ### Added

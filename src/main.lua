@@ -37,9 +37,20 @@ Config = Chalk.auto 'config.lua'
 -- ^ this updates our `.cfg` file in the config folder!
 public.config = Config -- so other mods can access our config
 
+---@type string
 SignalPrefix = "Abevol-MultiReward"
+---@type number
 ActiveCages = 0
+---@type number
 ActiveRewardSpawners = 0
+---@type boolean
+InShopContext = false
+---@type boolean
+ShouldBeBlocking = false
+---@type boolean
+InSpawnerContext = false
+---@type number[]
+NotRequiredConsumableIds = {}
 
 function printMsg(fmt, ...)
     local text = string.format(fmt, ...)
