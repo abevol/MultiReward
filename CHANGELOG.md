@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Softlock due to Artificer
+- Softlock due to infinite Duplication of Poms
+- Softlock due to NPC refresh not working correctly
+
+### Removed
+
+- NPC refreshes for Hades and Artemis (fields)
+
 ## [1.3.0] - 2025-07-02
 
 ### Added

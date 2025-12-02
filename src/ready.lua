@@ -7,10 +7,6 @@
 -- 	so you will most likely want to have it reference
 --	values and functions later defined in `reload.lua`.
 
-ModUtil.mod.Path.Wrap("StartNewRun", function(base, prevRun, args)
-    return base(prevRun, args)
-end)
-
 ModUtil.mod.Path.Wrap("RemoveStoreItem", function(base, args)
     return patch_RemoveStoreItem(base, args)
 end)
@@ -45,6 +41,10 @@ end)
 
 ModUtil.mod.Path.Wrap("UseConsumableItem", function(base, consumableItem, args, user)
 	return patch_UseConsumableItem(base, consumableItem, args, user)
+end)
+
+ModUtil.mod.Path.Wrap("IncrementTableValue", function(base, table, value)
+    return patch_IncrementTableValue(base, table, value)
 end)
 
 ModUtil.mod.Path.Wrap("ErisTakeOff", function(base, eris)

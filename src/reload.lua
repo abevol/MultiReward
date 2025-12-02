@@ -139,6 +139,7 @@ local function itemRepeater(type, name, args)
         reward = CreateHermesLoot(MergeTables(args, { SpawnPoint = spawnTarget, SuppressSpawnSounds = true, OffsetX = args.ChainSpawnOffset.X, OffsetY = args.ChainSpawnOffset.Y }))
     else
         reward = GiveLoot(MergeTables(args, { ForceLootName = name, SpawnPoint = spawnTarget, SuppressSpawnSounds = true, SuppressFlares = true, OffsetX = args.ChainSpawnOffset.X, OffsetY = args.ChainSpawnOffset.Y }))
+        reward.CanDuplicate = false
     end
     SetObstacleProperty({ Property = "MagnetismWhileBlocked", Value = 0, DestinationId = reward.ObjectId })
     return reward
@@ -182,24 +183,24 @@ function patch_UseLoot(base, usee, args, user)
         printMsg("Triggered %s", customSignalName)
     end
 
-	if not usee or not usee.SpeakerName or (usee.SpeakerName ~= "Hades" and usee.SpeakerName ~= "Artemis") then
+	-- if not usee or not usee.SpeakerName or (usee.SpeakerName ~= "Hades" and usee.SpeakerName ~= "Artemis") then
 		base(usee, args, user)
 
         if usee.ObjectId then
             local customSignalName = getSignalName("OnUseCompleted", usee.ObjectId)
             notifyExistingWaiters(customSignalName)
         end
-		return
-	end
+		-- return
+	-- end
 
-	local rewardCount = getRewardCount(Config.RewardCount.Story, usee.SpeakerName)
+	--[[ local rewardCount = getRewardCount(Config.RewardCount.Story, usee.SpeakerName)
 
 	base(usee, args, user)
 	if ActiveRewardSpawners == 0 then
 		thread(RefreshNPC, rewardCount - 1, usee)
 	else 
 		notifyExistingWaiters(getSignalName("NPCUsed"))
-	end
+	end ]]
 end
 
 function patch_OpenSpellScreen(base, spellItem, args, user)
@@ -340,6 +341,13 @@ function patch_StartDevotionTest(base, currentEncounter, args)
     base(currentEncounter, args)
     -- Devotions just despawn the boon that doesn't get taken, so we need to discard the chain spawner as well
     ActiveRewardSpawners = ActiveRewardSpawners - 1
+end
+
+function patch_IncrementTableValue(base, table, value)
+    if value == "MetaConversionUses" then
+        ActiveRewardSpawners = 0
+    end
+    return base(table, value)
 end
 
 function patch_UseNPC(base, npc, args, user)
